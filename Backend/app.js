@@ -13,12 +13,15 @@ const app = express();
 
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors());
+app.use(cors({
+  origin: "http://localhost:5173",
+  credentials: true
+}));
 
 app.use("/api/user", userRouter);
 app.use("/api/customer", customerRouter);
 app.use("/api/expense", expenseRouter);
-app.use("/api/product", productRouter); // ✅ fixed slash
+app.use("/api/product", productRouter);   
 app.use("/api/sales", salesRouter);
 app.use("/api/supplier", supplierRouter);
 

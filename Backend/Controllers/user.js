@@ -66,16 +66,17 @@ export async function login (req , res) {
     )
     res.cookie("accessToken", accessToken, {
         httpOnly: true,
-        secure: true,
+        secure: false,
         sameSite: "strict",
         maxAge: 7* 24 * 60 * 60 * 1000
     })
-    res.status(200).json({
+    return res.status(200).json({
         success: true,
         data: user,
         token: accessToken,
         message: "User Logged In Success "
     });
+    console.log("LOGIN RESPONSE:", res.data);
     }
     catch(error) {
         res.status(400).json({

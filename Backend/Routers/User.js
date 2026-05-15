@@ -11,7 +11,7 @@ import {
 const userRouter = Router();
 
 userRouter.post(
-  "/create",
+  "/register",
   validateAll(registerSchema),
   userController.register
 );

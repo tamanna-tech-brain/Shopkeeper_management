@@ -23,10 +23,10 @@ export async function createProduct(req, res){
 
 export async function getProduct(req, res) {
     try{
-        const {page, limit, skip} = getPagination(req/query);
+        const {page, limit, skip} = getPagination(req.query);
         const {search = ""} = req.query;
         const matchStage = getSearchMatch(search, "name");
-
+        const total = await productModel.countDocuments(matchStage);
         const productGets = await productModel.find(matchStage).skip(skip).limit(limit);
         res.json({
         success: true,
@@ -101,7 +101,7 @@ export async function deleteProductById(req, res) {
             message: "product not found"
             });
         }
-        return res.status(201).json({
+        return res.status(200).json({
             success: true,
             data : productDeleted,
             message: "Deleted successfully"
