@@ -195,7 +195,7 @@ const GetAllProduct = () => {
                 }}
                 className="w-full max-w md p-4 rounded-2xl outline-none
                 bg-white/10 text-white placeholder:text-gray-300
-                border border-white/20 backdrop-blur-xl"
+                border border-white/20 backdrop-blur-xl "
                 />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
@@ -236,7 +236,7 @@ const GetAllProduct = () => {
             </div>
         </div>
     )
-};
+}
 
 const GetProductById = () => {
     const {id} = useParams();

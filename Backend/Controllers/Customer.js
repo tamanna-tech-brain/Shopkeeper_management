@@ -32,7 +32,12 @@ export async function getCustomer(req, res) {
         res.json({
         success: true,
         data: customerGets,
-        pagination: Math.ceil(total / limit)
+        pagination: {
+            total,
+            page,
+            limit,
+            totalPages: Math.ceil(total/limit),
+        }
     });
 
   } catch (err) {

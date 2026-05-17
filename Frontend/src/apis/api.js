@@ -34,7 +34,7 @@ const handleError = (error) => {
     error.message ||
     "Something went wrong";
 
-    console.error("API ERROR:", error.message);
+    console.error("API ERROR:", error.response?.data || error.message);
 
     if (error.response?.status === 401) {
         localStorage.removeItem('token');
@@ -42,7 +42,7 @@ const handleError = (error) => {
     }
     return Promise.reject({
         success : false,
-        message: error.message,
+        message: error.response?.data?.message || error.message,
         status : error.response?.status,
     });
 };
@@ -95,6 +95,22 @@ export const deleteProductById = (id) =>
     API.delete(`/product/delete/${id}`);
 
 //============sales============//
+export const createCustomer = (data) => 
+    API.post("/customer/create", data);
+
+export const getCustomer = (page = 1, limit = 100, search="") =>
+  API.get(`/customer/get?page=${page}&limit=${limit}&search=${search}`);
+
+export const getCustomerById = (id) =>
+    API.get(`/customer/get/${id}`);
+
+export const updateCustomerById = (id,data) =>
+    API.put(`/customer/update/${id}`, data);
+
+export const deleteCustomerById = (id) =>
+    API.delete(`/customer/delete/${id}`);
+
+//============sales============//
 export const createSales = (data) => 
     API.post("/sales/create", data);
 
@@ -109,6 +125,22 @@ export const updateSalesById = (id,data) =>
 
 export const deleteSalesById = (id) =>
     API.delete(`/sales/delete/${id}`);
+
+//============Expenses============//
+export const createExpense = (data) => 
+    API.post("/expense/create", data);
+
+export const getExpenses = (page = 1, limit = 2, search="") =>
+  API.get(`/expense/get?page=${page}&limit=${limit}&search=${search}`);
+
+export const getExpensesById = (id) =>
+    API.get(`/expense/get/${id}`);
+
+export const updateExpensesById = (id,data) =>
+    API.put(`/expense/update/${id}`, data);
+
+export const deleteExpenseById = (id) =>
+    API.delete(`/expense/delete/${id}`);
 
 
 

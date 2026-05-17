@@ -17,8 +17,14 @@ function Navbar() {
       <Link to="/product" className="hover:text-red-400">
       Product
       </Link>
+      <Link to="/Customer" className="hover:text-red-400">
+      Customer
+      </Link>
       <Link to="/sales" className="hover:text-red-400">
       sales
+      </Link>
+      <Link to="/expense" className="hover:text-red-400">
+      expense
       </Link>
     </div>
   );

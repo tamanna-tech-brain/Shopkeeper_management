@@ -3,12 +3,12 @@ import product from "./Product.js"
 
 const salesSchema = new mongoose.Schema({
     customerId : {type : mongoose.Schema.Types.ObjectId,
-        ref: "customers"
+        ref: "customer"
     },
     items: [
         {
         productId: {type: mongoose.Schema.Types.ObjectId,
-        ref: "products"
+        ref: "product"
         },
     quantity : {
         type:Number,
