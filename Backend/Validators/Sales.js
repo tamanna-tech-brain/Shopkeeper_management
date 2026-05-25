@@ -25,7 +25,7 @@ export const saleSchema = joi.object({
 
   paymentMethod: joi
     .string()
-    .valid("cash", "upi", "card")
+    .valid("Cash", "UPI", "Card")
     .required(),
 
   date: joi.date().optional(),
@@ -56,12 +56,8 @@ export const saleUpdateSchema = joi.object({
 
   paymentMethod: joi
     .string()
-    .valid("cash", "upi", "card")
+    .valid("Cash", "UPI", "Card")
     .required(),
 
   date: joi.date().optional(),
 });
-
-
-
-export default { saleSchema, saleUpdateSchema };

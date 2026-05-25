@@ -32,11 +32,11 @@ export async function getProduct(req, res) {
         success: true,
         data: productGets,
         pagination: {
-            page,
-            limit,
-            total,
-            totalPage:Math.ceil(total / limit)
-        },
+   page,
+   limit,
+   total,
+   totalPages: Math.ceil(total / limit)
+},
         message: "product found successfully"
     });
 
@@ -48,7 +48,7 @@ export async function getProduct(req, res) {
 export async function getProductById(req, res) {
     try{
         const {id} = req.params
-        const productGetById = await productModel.findById(id);
+        const productGetById = await productModel.findById(id).populate("supplierId");
         if(!productGetById) {
            return res.status(404).json({
             success: false,

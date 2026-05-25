@@ -6,9 +6,13 @@ import {getSearchMatch} from "../utils/search.js"
 export async function createSupplier(req, res){
     try{
         const { name , phone, address} = req.body;
+         console.log("body to create", {
+            name , phone, address
+        })
         const supplierCreates = await supplierModel.create({
             name , phone, address
         });
+         console.log("after  create", supplierCreates)
         return res.status(201).json({
             success: true,
             data: supplierCreates,
@@ -16,6 +20,7 @@ export async function createSupplier(req, res){
     });
     }
     catch (error) {
+        console.error("error", error)
         return res.status(400).json({
         success: false,
         message: error.message

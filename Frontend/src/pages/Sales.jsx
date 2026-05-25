@@ -1,96 +1,154 @@
 import { useNavigate, useParams } from "react-router-dom";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
-import {createSales, getSales, getSalesById, updateSalesById,deleteSalesById, getCustomer, getProduct} from "../apis/api"
+import {
+  createSales,
+  getSales,
+  getSalesById,
+  updateSalesById,
+  deleteSalesById,
+  getCustomer,
+  getProduct,
+} from "../apis/api";
 
+const SalesDashboard = () => {
 
-const SalesDashboard =  () => {
-   const navigate = useNavigate();
+  const navigate = useNavigate();
 
-   return (
-     <div className="min-h-screen bg-gradient-to-br from-black via-slate-900 to-purple-950 p-10">
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-black via-slate-900 to-purple-950 p-10">
+
       <div className="flex justify-between items-center mb-10">
 
-         <h1 className="text-5xl font-bold text-white">
-            sales Dashboard
-         </h1>
-          <button
+        <h1 className="text-5xl font-bold text-white">
+          Sales Dashboard
+        </h1>
+
+        <button
           onClick={() => navigate("/sales/create")}
           className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold px-6 py-3 rounded-2xl"
         >
-          Create Sale
+          Create Sales
         </button>
+
       </div>
-      <GetAllSales/>
+
+      <GetAllSales />
+
     </div>
-   )
-}
+  );
+};
 
 const CreateSales = () => {
-    const navigate = useNavigate();
 
-    const [customers, setCustomers] = useState([]);
-    const [products, setProducts] = useState([]);
-    const [productId, setProductId] = useState("");
-    const [customerId, setCustomerId] = useState("")
-    const [items, setItems] = useState("");
-    const [quantity, setQuantity] = useState("");
-    const [price, setPrice] = useState("");
-    const totalAmount = Number(quantity || 0) * Number(price || 0);
-    const [paymentMethod, setPaymentMethod] = useState("cash");
-    const [date, setDate] = useState("");    
+  const navigate = useNavigate();
 
-    useEffect(() => {
-        fetchCustomers();
-        fetchProducts();
-    }, []);
+  const [customers, setCustomers] = useState([]);
+  const [products, setProducts] = useState([]);
 
-    const fetchCustomers = async () => {
-        try{
-            const res = await getCustomer();
-            setCustomers(res.data.data || []);
-        } catch (error) {
-            console.log(error);
-        }
-    }
-    const fetchProducts = async () => {
+  const [customerId, setCustomerId] = useState("");
+  const [productId, setProductId] = useState("");
+
+  const [quantity, setQuantity] = useState("");
+  const [price, setPrice] = useState("");
+
+  const [paymentMethod, setPaymentMethod] = useState("Cash");
+
+  const [date, setDate] = useState("");
+
+  const totalAmount =
+    Number(quantity || 0) * Number(price || 0);
+
+  useEffect(() => {
+
+    fetchCustomers();
+    fetchProducts();
+
+  }, []);
+
+  const fetchCustomers = async () => {
+
     try {
 
-        const res = await getProduct();
+      const res = await getCustomer(1, 100);
 
-        setProducts(res.data.data || []);
+      setCustomers(res.data.data || []);
 
-        } catch (error) {
-        console.log(error);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const fetchProducts = async () => {
+
+    try {
+
+      const res = await getProduct(1, 100);
+
+      setProducts(res.data.data || []);
+
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleCreate = async () => {
+
+    try {
+
+      if (
+        !customerId ||
+        !productId ||
+        !quantity ||
+        !price ||
+        !paymentMethod ||
+        !date
+      ) {
+        return alert("Fill all fields");
       }
-    };
 
-    const handleCreate = async () => {
-        try {
-            const salesData = {
-                customerId,
-                items: [
-                    {
-                        productId,
-                        quantity,
-                        price,
-                    },
-                ],
-                totalAmount,
-                paymentMethod,
-                date
-            };
-            await createSales(salesData);
-            alert("sales created successfully");
-            navigate("/sales");
+      const salesData = {
+        customerId,
+        items: [
+          {
+            productId,
+            quantity,
+            price,
+          },
+        ],
+        totalAmount,
+        paymentMethod,
+        date,
+      };
 
-        } catch (error) {
-            console.log(error);
-            alert(error.message);
-        }
-    };
-    return (
-     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-purple-900 to-slate-900 p-10">
+      await createSales(salesData);
+
+      alert("Sales created successfully");
+      console.log("customer",{
+       customerId,
+        items: [
+          {
+            productId,
+            quantity,
+            price,
+          },
+        ],
+        totalAmount,
+        paymentMethod,
+        date
+      })
+      navigate("/sales");
+
+    } catch (error) {
+
+      console.log(error);
+      alert(error.response?.data?.message || error.message);
+
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-purple-900 to-slate-900 p-10">
 
       <div className="w-full max-w-lg bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-8 shadow-2xl">
 
@@ -99,43 +157,51 @@ const CreateSales = () => {
         </h1>
 
         <select
-        value={customerId}
-        onChange={(e) => setCustomerId(e.target.value)}
-        className="w-full mb-4 p-4 rounded-xl outline-none">
-        
-        <option value="">select Customer</option>
-        {
-                customers.map((customer) => (
-                <option key={customer._id} value={customer._id}>
-                    {customer.name}
-                </option>
+          value={customerId}
+          onChange={(e) => setCustomerId(e.target.value)}
+          className="w-full mb-4 p-4 rounded-xl outline-none"
+        >
+
+          <option value="">
+            Select Customer
+          </option>
+
+          {
+            customers.map((customer) => (
+              <option
+                key={customer._id}
+                value={customer._id}
+              >
+                {customer.name}
+              </option>
             ))
-        }
+          }
+
         </select>
 
         <select
-        value={productId}
-        onChange={(e) => setProductId(e.target.value)}
-        className="w-full mb-4 p-4 rounded-xl outline-none"
+          value={productId}
+          onChange={(e) => setProductId(e.target.value)}
+          className="w-full mb-4 p-4 rounded-xl outline-none"
         >
 
-        <option value="">
-             Select Product
-        </option>
+          <option value="">
+            Select Product
+          </option>
 
-        {
+          {
             products.map((product) => (
-                <option
-                    key={product._id}
-                    value={product._id}
-                >
-                    {product.name}
-                </option>
+              <option
+                key={product._id}
+                value={product._id}
+              >
+                {product.name}
+              </option>
             ))
-        }
+          }
 
         </select>
-        
+
         <input
           type="number"
           placeholder="Quantity"
@@ -154,23 +220,32 @@ const CreateSales = () => {
 
         <input
           type="number"
-          placeholder="Total Amount"
           value={totalAmount}
-          onChange={(e) => setTotalAmount(e.target.value)}
-          className="w-full mb-4 p-4 rounded-xl outline-none"
+          readOnly
+          className="w-full mb-4 p-4 rounded-xl bg-gray-200 outline-none"
         />
 
         <select
-        value={paymentMethod}
-        onChange={(e) => setPaymentMethod(e.target.value)}
-        className="w-full mb-4 p-4 rounded-xl outline-none">
-            <option value="">select payment</option>
-            <option value="Cash">Cash</option>
-            <option value="UPI">UPI</option>
-            <option value="Card">Card</option>
+          value={paymentMethod}
+          onChange={(e) => setPaymentMethod(e.target.value)}
+          className="w-full mb-4 p-4 rounded-xl outline-none"
+        >
+
+          <option value="Cash">
+            Cash
+          </option>
+
+          <option value="UPI">
+            UPI
+          </option>
+
+          <option value="Card">
+            Card
+          </option>
+
         </select>
 
-         <input
+        <input
           type="date"
           value={date}
           onChange={(e) => setDate(e.target.value)}
@@ -184,112 +259,230 @@ const CreateSales = () => {
           Create Sales
         </button>
 
+      </div>
 
-      </div>  
     </div>
-    
-    )
-}; 
-
-const GetAllSales = () => {
-    const navigate = useNavigate();
-    const [sales, setSales] = useState([]);
-    const fetchSales = async () => {
-        try {
-            const res = await getSales()
-            setSales(res.data.data || []);
-
-        }
-        catch (error) {
-            console.log(error);
-        }
-    };
-
-    useEffect(() => {
-        fetchSales();
-    }, []);
-
-    return(
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {
-                    sales.map((sale) => (
-                        <div
-                        key={sale._id}
-                        onClick={() => navigate(`/sales/get/${sale._id}`)}
-                        className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-6 shadow-2xl cursor-pointer hover:scale-105 transition"
-                        >
-                            <h2 className="text-2xl text-pink-400 font-bold mb-3 ">
-                                {sale.totalAmount}
-                            </h2>
-
-                            <p className="text-gray-300">
-                                {sale.paymentMethod}
-                            </p>
-
-                             <p className="text-gray-300">
-                                Qty :
-                            {sale.items?.[0]?.quantity}
-                            </p>
-                            </div>
-                    ))
-                }
-            </div>
-
-    );
+  );
 };
 
-const GetSalesById =  () => {
-    const {id} = useParams();
-    const navigate = useNavigate();
+const GetAllSales = () => {
 
-    const [sale, setSale] = useState(null);
+  const navigate = useNavigate();
 
-    useEffect(() => {
-        fetchSales();
-    }, [id]);
+  const [sales, setSales] = useState([]);
 
-    const fetchSales = async () => {
-        try {
-            const res = await getSalesById(id);
-            setSale(res.data.data);
-        } catch (error) {
-            console.log(error);
-        }
-    };
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
 
-    if(!sale) {
-        return (
-            <div className="min-h-screen flex items-center justify-center text-white text-3xl">
-                Loading...
-          </div>
-        );
+  const limit = 2;
+
+  const fetchSales = async (currentPage) => {
+
+    try {
+      const res = await getSales(currentPage, limit);
+      setSales(res.data.data || []);
+    } catch (error) {
+      console.log(error);
     }
+  };
+
+  useEffect(() => {
+    fetchSales(page);
+  }, [page]);
+
+  const filteredSales = sales.filter((sale) => {
+
+    const keyword = search.toLowerCase().trim();
+
+    const customerName = sale?.customerId?.name?.toLowerCase() || "";
+    const productName = sale?.items?.[0]?.productId?.name?.toLowerCase() || "";
+    const payment = sale?.paymentMethod?.toLowerCase() || "";
+    const totalAmount = String(sale?.totalAmount || "");
+
     return (
-         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-purple-900 to-slate-900 p-10">
+      customerName.includes(keyword) ||
+      productName.includes(keyword) ||
+      payment.includes(keyword) ||
+      totalAmount.includes(keyword)
+    );
+  });
 
-            <div className="w-full max-w-md bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-8 text-white shadow-2xl">
+  return (
 
-                <h1 className="text-3xl font-bold text-center mb-6">
-                    Sales Details
-                </h1>
-                <p className="mb-3">
-          <span className="font-bold">Items:</span> {sale.items?.[0]?.quantity}
+    <div>
+
+      {/* CENTER SEARCH BAR */}
+      <div className="flex justify-center mb-8">
+        <input
+          type="text"
+          placeholder="Search by customer, product, payment..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="p-3 rounded-xl w-96 outline-none text-black"
+        />
+      </div>
+
+      {/* SALES GRID */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+        {
+          filteredSales.map((sale) => (
+
+            <div
+              key={sale._id}
+              onClick={() => navigate(`/sales/get/${sale._id}`)}
+              className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-6 shadow-2xl cursor-pointer hover:scale-105 transition"
+            >
+
+              <h2 className="text-2xl text-pink-400 font-bold mb-3">
+                ₹ {sale.totalAmount}
+              </h2>
+
+              <p className="text-gray-300 mb-2">
+                Customer : {sale?.customerId?.name || "No Customer"}
+              </p>
+
+              <p className="text-gray-300 mb-2">
+                Product : {sale?.items?.[0]?.productId?.name || "No Product"}
+              </p>
+
+              <p className="text-gray-300 mb-2">
+                Quantity : {sale?.items?.[0]?.quantity}
+              </p>
+
+              <p className="text-gray-300 mb-2">
+                Price : ₹ {sale?.items?.[0]?.price}
+              </p>
+
+              <p className="text-gray-300">
+                Payment : {sale.paymentMethod}
+              </p>
+
+            </div>
+
+          ))
+        }
+
+      </div>
+
+      {/* PAGINATION */}
+      <div className="flex justify-center items-center gap-6 mt-10 text-white">
+
+        <button
+          onClick={() => setPage((p) => Math.max(p - 1, 1))}
+          className="bg-gray-700 px-4 py-2 rounded-xl hover:bg-gray-600"
+        >
+          Prev
+        </button>
+
+        <span className="text-lg font-bold">
+          Page {page}
+        </span>
+
+        <button
+          onClick={() => setPage((p) => p + 1)}
+          className="bg-gray-700 px-4 py-2 rounded-xl hover:bg-gray-600"
+        >
+          Next
+        </button>
+
+      </div>
+
+    </div>
+  );
+};
+
+const GetSalesById = () => {
+
+  const { id } = useParams();
+
+  const navigate = useNavigate();
+
+  const [sale, setSale] = useState(null);
+
+  useEffect(() => {
+
+    fetchSales();
+
+  }, [id]);
+
+  const fetchSales = async () => {
+
+    try {
+
+      const res = await getSalesById(id);
+
+      setSale(res.data.data);
+
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  if (!sale) {
+
+    return (
+      <div className="min-h-screen flex items-center justify-center text-white text-3xl">
+        Loading...
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-purple-900 to-slate-900 p-10">
+
+      <div className="w-full max-w-md bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-8 text-white shadow-2xl">
+
+        <h1 className="text-3xl font-bold text-center mb-6">
+          Sales Details
+        </h1>
+
+        <p className="mb-3">
+          <span className="font-bold">
+            Customer :
+          </span>
+          {" "}
+          {sale?.customerId?.name}
         </p>
 
         <p className="mb-3">
-          <span className="font-bold">Quantity:</span>  {sale.items?.[0]?.quantity}
+          <span className="font-bold">
+            Product :
+          </span>
+          {" "}
+          {sale?.items?.[0]?.productId?.name}
         </p>
 
         <p className="mb-3">
-          <span className="font-bold">Price:</span>  {sale.items?.[0]?.price}
+          <span className="font-bold">
+            Quantity :
+          </span>
+          {" "}
+          {sale?.items?.[0]?.quantity}
         </p>
 
         <p className="mb-3">
-          <span className="font-bold">Total:</span> {sale.totalAmount}
+          <span className="font-bold">
+            Price :
+          </span>
+          {" "}
+          ₹ {sale?.items?.[0]?.price}
+        </p>
+
+        <p className="mb-3">
+          <span className="font-bold">
+            Total :
+          </span>
+          {" "}
+          ₹ {sale.totalAmount}
         </p>
 
         <p className="mb-6">
-          <span className="font-bold">Payment:</span> {sale.paymentMethod}
+          <span className="font-bold">
+            Payment :
+          </span>
+          {" "}
+          {sale.paymentMethod}
         </p>
 
         <button
@@ -305,333 +498,247 @@ const GetSalesById =  () => {
         >
           Delete
         </button>
-            </div>
-        </div>
-    )
-};
 
+      </div>
+
+    </div>
+  );
+};
 
 const UpdateSalesById = () => {
 
-    const { id } = useParams();
+  const { id } = useParams();
 
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
-    const [customers, setCustomers] = useState([]);
-    const [products, setProducts] = useState([]);
-    const [productId, setProductId] = useState("");
-    const [customerId, setCustomerId] = useState("");
-    const [items, setItems] = useState("");
-    const [quantity, setQuantity] = useState("");
-    const [price, setPrice] = useState("");
-    const [paymentMethod, setPaymentMethod] = useState("Cash");
-    const [date, setDate] = useState("");
+  const [customers, setCustomers] = useState([]);
+  const [products, setProducts] = useState([]);
 
-    const totalAmount =
-        Number(quantity || 0) * Number(price || 0);
+  const [customerId, setCustomerId] = useState("");
+  const [productId, setProductId] = useState("");
 
-    useEffect(() => {
+  const [quantity, setQuantity] = useState("");
+  const [price, setPrice] = useState("");
 
-        fetchCustomers();
-        fetchProducts();
-        fetchSales();
+  const [paymentMethod, setPaymentMethod] = useState("Cash");
 
-    }, [id]);
+  const [date, setDate] = useState("");
 
-    const fetchCustomers = async () => {
+  const totalAmount =
+    Number(quantity || 0) * Number(price || 0);
 
-        try {
+  useEffect(() => {
 
-            const res = await getCustomer();
+    fetchCustomers();
+    fetchProducts();
+    fetchSales();
 
-            setCustomers(res.data.data || []);
+  }, [id]);
 
-        } catch (error) {
-            console.log(error);
-        }
-    };
-    const fetchProducts = async () => {
+  const fetchCustomers = async () => {
+
     try {
 
-        const res = await getProduct();
+      const res = await getCustomer(1, 100);
 
-        setProducts(res.data.data || []);
+      setCustomers(res.data.data || []);
 
-        } catch (error) {
-        console.log(error);
-          }
-    };
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
-    const fetchSales = async () => {
+  const fetchProducts = async () => {
 
-        try {
+    try {
 
-            const res = await getSalesById(id);
+      const res = await getProduct(1, 100);
 
-            const sale = res.data.data;
+      setProducts(res.data.data || []);
 
-            setCustomerId(sale.customerId);
-            setItems(sale.items);
-            setProductId(sale.items?.[0]?.productId || "");
-            setQuantity(sale.items?.[0]?.quantity || "");
-            setPrice(sale.items?.[0]?.price || "");
-            setPaymentMethod(sale.paymentMethod);
-            setDate(sale.date?.split("T")[0]);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
-        } catch (error) {
-            console.log(error);
-        }
-    };
+  const fetchSales = async () => {
 
-    const handleUpdate = async () => {
+    try {
 
-        try {
+      const res = await getSalesById(id);
 
-            const updatedData = {
-                customerId,
-                items: [
-                    {
-                        productId,
-                        quantity,
-                        price,
-                    },
-                ],
-                totalAmount,
-                paymentMethod,
-                date,
-            };
+      const sale = res.data.data;
 
-            await updateSalesById(id, updatedData);
+      setCustomerId(
+        sale?.customerId?._id
+          ? String(sale.customerId._id)
+          : ""
+      );
 
-            alert("Sales updated successfully");
+      setProductId(
+        sale?.items?.[0]?.productId?._id
+          ? String(sale.items[0].productId._id)
+          : ""
+      );
 
-            navigate("/sales");
+      setQuantity(sale?.items?.[0]?.quantity || "");
+      setPrice(sale?.items?.[0]?.price || "");
 
-        } catch (error) {
+      setPaymentMethod(sale.paymentMethod || "Cash");
 
-            console.log(error);
+      setDate(sale?.date?.split("T")[0] || "");
 
-            alert(error.message);
-        }
-    };
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
-    return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-yellow-900 to-slate-900 p-10">
+  const handleUpdate = async () => {
 
-            <div className="w-full max-w-lg bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-8 shadow-2xl">
+    try {
 
-                <h1 className="text-3xl font-bold text-white text-center mb-8">
-                    Update Sales
-                </h1>
+      const updatedData = {
+        customerId,
+        items: [
+          {
+            productId,
+            quantity,
+            price,
+          },
+        ],
+        totalAmount,
+        paymentMethod,
+        date,
+      };
 
-                <select
-                    value={customerId}
-                    onChange={(e) => setCustomerId(e.target.value)}
-                    className="w-full mb-4 p-3 rounded-xl outline-none"
-                >
+      await updateSalesById(id, updatedData);
 
-                    <option value="">
-                        Select Customer
-                    </option>
+      alert("Sales updated successfully");
 
-                    {
-                        customers.map((customer) => (
-                            <option
-                                key={customer._id}
-                                value={customer._id}
-                            >
-                                {customer.name}
-                            </option>
-                        ))
-                    }
+      navigate("/sales");
 
-                </select>
+    } catch (error) {
 
-                <select
-                   value={productId}
-                   onChange={(e) => setProductId(e.target.value)}
-                   className="w-full mb-4 p-3 rounded-xl outline-none"
-                >
+      console.log(error);
 
-                <option value="">
-                    Select Product
-                </option>
+      alert(error.response?.data?.message || error.message);
 
-                {
-                    products.map((product) => (
-                    <option
-                        key={product._id}
-                        value={product._id}
-                    >
-                          {product.name}
-                    </option>
-                    ))
-                }
+    }
+  };
 
-                </select>  
-
-                
-
-                <input
-                    type="number"
-                    placeholder="Quantity"
-                    value={quantity}
-                    onChange={(e) => setQuantity(e.target.value)}
-                    className="w-full mb-4 p-3 rounded-xl outline-none"
-                />
-
-                <input
-                    type="number"
-                    placeholder="Price"
-                    value={price}
-                    onChange={(e) => setPrice(e.target.value)}
-                    className="w-full mb-4 p-3 rounded-xl outline-none"
-                />
-
-                <input
-                    type="number"
-                    value={totalAmount}
-                    readOnly
-                    className="w-full mb-4 p-3 rounded-xl bg-gray-200 outline-none"
-                />
-
-                <select
-                    value={paymentMethod}
-                    onChange={(e) => setPaymentMethod(e.target.value)}
-                    className="w-full mb-4 p-3 rounded-xl outline-none"
-                >
-                    <option value="Cash">Cash</option>
-                    <option value="UPI">UPI</option>
-                    <option value="Card">Card</option>
-                </select>
-
-
-                <input
-                    type="date"
-                    value={date}
-                    onChange={(e) => setDate(e.target.value)}
-                    className="w-full mb-6 p-3 rounded-xl outline-none"
-                />
-
-                <button
-                    onClick={handleUpdate}
-                    className="bg-yellow-500 hover:bg-yellow-600 text-white w-full p-3 rounded-xl"
-                >
-                    Update Sales
-                </button>
-
-            </div>
-
-        </div>
-    );
+  return (
+    <CreateSales />
+  );
 };
-
 
 const DeleteSalesById = () => {
 
-    const { id } = useParams();
+  const { id } = useParams();
 
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
-    const [sale, setSale] = useState(null);
+  const [sale, setSale] = useState(null);
 
-    useEffect(() => {
+  useEffect(() => {
 
-        fetchSales();
+    fetchSales();
 
-    }, [id]);
+  }, [id]);
 
-    const fetchSales = async () => {
+  const fetchSales = async () => {
 
-        try {
+    try {
 
-            const res = await getSalesById(id);
+      const res = await getSalesById(id);
 
-            setSale(res.data.data);
+      setSale(res.data.data);
 
-        } catch (error) {
-            console.log(error);
-        }
-    };
-
-    const handleDelete = async () => {
-
-        try {
-
-            await deleteSalesById(id);
-
-            alert("Sales deleted successfully");
-
-            navigate("/sales");
-
-        } catch (error) {
-
-            console.log(error);
-
-            alert(error.message);
-        }
-    };
-
-    if (!sale) {
-        return (
-            <div className="min-h-screen flex items-center justify-center text-white text-3xl">
-                Loading...
-            </div>
-        );
+    } catch (error) {
+      console.log(error);
     }
+  };
+
+  const handleDelete = async () => {
+
+    try {
+
+      await deleteSalesById(id);
+
+      alert("Sales deleted successfully");
+
+      navigate("/sales");
+
+    } catch (error) {
+
+      console.log(error);
+
+      alert(error.response?.data?.message || error.message);
+
+    }
+  };
+
+  if (!sale) {
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-red-900 to-slate-900 p-10">
+      <div className="min-h-screen flex items-center justify-center text-white text-3xl">
+        Loading...
+      </div>
+    );
+  }
 
-            <div className="w-full max-w-md bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-8 shadow-2xl text-white">
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-red-900 to-slate-900 p-10">
 
-                <h1 className="text-3xl font-bold text-center mb-6">
-                    Delete Sales
-                </h1>
+      <div className="w-full max-w-md bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-8 shadow-2xl text-white">
 
-                <div className="text-center mb-8">
+        <h1 className="text-3xl font-bold text-center mb-6">
+          Delete Sales
+        </h1>
 
-                    <h2 className="text-2xl font-bold mb-3">
-                        Product Quantity : {sale.items?.[0]?.quantity}
-                    </h2>
+        <div className="text-center mb-8">
 
-                    <p className="mb-2">
-                        Quantity : {sale.items?.[0]?.quantity
-}
-                    </p>
+          <h2 className="text-2xl font-bold mb-3">
+            ₹ {sale.totalAmount}
+          </h2>
 
-                    <p className="mb-2">
-                        Price : ₹ {sale.items?.[0]?.price}
-                    </p>
+          <p className="mb-2">
+            Product :
+            {" "}
+            {sale?.items?.[0]?.productId?.name}
+          </p>
 
-                    <p className="mb-2">
-                        Total : ₹ {sale.totalAmount}
-                    </p>
+          <p className="mb-2">
+            Quantity :
+            {" "}
+            {sale?.items?.[0]?.quantity}
+          </p>
 
-                    <p className="mb-2">
-                        Payment : {sale.paymentMethod}
-                    </p>
-
-                </div>
-
-                <button
-                    onClick={handleDelete}
-                    className="bg-red-500 hover:bg-red-600 text-white w-full p-3 rounded-xl"
-                >
-                    Delete Sales
-                </button>
-
-            </div>
+          <p className="mb-2">
+            Price :
+            {" "}
+            ₹ {sale?.items?.[0]?.price}
+          </p>
 
         </div>
-    );
+
+        <button
+          onClick={handleDelete}
+          className="bg-red-500 hover:bg-red-600 text-white w-full p-3 rounded-xl"
+        >
+          Delete Sales
+        </button>
+
+      </div>
+
+    </div>
+  );
 };
 
 export {
-    SalesDashboard,
-    CreateSales,
-    GetAllSales,
-    GetSalesById,
-    UpdateSalesById,
-    DeleteSalesById,
+  SalesDashboard,
+  CreateSales,
+  GetAllSales,
+  GetSalesById,
+  UpdateSalesById,
+  DeleteSalesById,
 };

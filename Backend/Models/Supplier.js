@@ -7,7 +7,8 @@ const supplierSchema = new mongoose.Schema({
     },
     phone: {
         type :String,
-        required : true
+        required : true,
+        unique: true
     },
     address: {
         type: String,
