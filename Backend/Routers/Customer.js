@@ -1,5 +1,5 @@
 import Router from "express";
-import { validateAll } from "../middleware/validate.js";
+import { validateAll } from "../Middleware/validate.js";
 import *as customerController from "../Controllers/Customer.js";
 import { customerSchema, customerUpdateSchema } from "../Validators/Customer.js";
 const customerRouter = Router();

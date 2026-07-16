@@ -1,5 +1,5 @@
 import Router from "express";
-import { validateAll } from "../middleware/validate.js";
+import { validateAll } from "../Middleware/validate.js";
 import *as expenseController from "../Controllers/Expense.js";
 import { expenseSchema, expenseUpdateSchema } from "../Validators/Expense.js";
 const expenseRouter = Router();

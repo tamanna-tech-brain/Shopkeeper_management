@@ -42,6 +42,7 @@ const CreateProduct = () => {
   const [stock, setStock] = useState("");
   const [barcode, setBarcode] = useState("");
   const [supplierId, setSupplierId] = useState("");
+  const [file, setFile] = useState(null);
 
   const [supplier, setSupplier] = useState([]);
 
@@ -75,16 +76,18 @@ const CreateProduct = () => {
         return alert("Fill all fields");
       }
 
-      const productData = {
-        name,
-        category,
-        price,
-        stock,
-        barcode,
-        supplierId,
-      };
+      const formData = new FormData();
+      formData.append("name", name);
+      formData.append("category", category);
+      formData.append("price", price);
+      formData.append("stock", stock);
+      formData.append("barcode", barcode);
+      formData.append("supplierId", supplierId);
+      if (file) {
+        formData.append("image", file);
+      }
 
-      await createProduct(productData);
+      await createProduct(formData);
 
       alert("Product created successfully");
 
@@ -145,23 +148,33 @@ const CreateProduct = () => {
         />
 
         <select
-  value={String(supplierId)}
-  onChange={(e) => setSupplierId(String(e.target.value))}
-  className="w-full mb-6 p-3 rounded-xl outline-none"
->
-  <option value="">
-    Select Supplier
-  </option>
+          value={String(supplierId)}
+          onChange={(e) => setSupplierId(String(e.target.value))}
+          className="w-full mb-4 p-3 rounded-xl outline-none"
+        >
+          <option value="">
+            Select Supplier
+          </option>
 
-  {supplier?.map((s) => (
-    <option
-      key={s._id}
-      value={String(s._id)}
-    >
-      {s.name}
-    </option>
-  ))}
-</select>
+          {supplier?.map((s) => (
+            <option
+              key={s._id}
+              value={String(s._id)}
+            >
+              {s.name}
+            </option>
+          ))}
+        </select>
+
+        <div className="mb-6 text-left">
+          <label className="block text-white mb-2 text-sm font-semibold">Product Image</label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => setFile(e.target.files[0])}
+            className="w-full p-2 bg-white/10 text-white rounded-xl outline-none border border-white/20"
+          />
+        </div>
 
         <button
           onClick={handleSubmit}
@@ -235,10 +248,21 @@ setProducts(Array.isArray(res.data.data) ? res.data.data : []);
             key={product._id}
             onClick={() => navigate(`/product/get/${product._id}`)}
             className="bg-white/10 backdrop-blur-xl border border-white/20
-            rounded-3xl h-52 flex items-center justify-center
+            rounded-3xl p-6 flex flex-col items-center justify-between
             shadow-2xl hover:scale-105 transition cursor-pointer"
           >
-            <h2 className="text-3xl text-white font-bold text-center">
+            {product.image ? (
+              <img
+                src={product.image}
+                alt={product.name}
+                className="w-full h-32 object-cover rounded-2xl mb-4"
+              />
+            ) : (
+              <div className="w-full h-32 bg-slate-800 rounded-2xl flex items-center justify-center mb-4 text-gray-400">
+                No Image
+              </div>
+            )}
+            <h2 className="text-2xl text-white font-bold text-center">
               {product.name}
             </h2>
           </div>
@@ -312,6 +336,14 @@ const GetProductById = () => {
           {product.name}
         </h1>
 
+        {product.image && (
+          <img
+            src={product.image}
+            alt={product.name}
+            className="w-full h-48 object-cover rounded-2xl mb-6 border border-white/10"
+          />
+        )}
+
         <p className="mb-2">
           <span className="font-bold">Category: </span>
           {product.category}
@@ -367,6 +399,7 @@ const UpdateProductById = () => {
   const [stock, setStock] = useState("");
   const [barcode, setBarcode] = useState("");
   const [supplierId, setSupplierId] = useState("");
+  const [file, setFile] = useState(null);
 
   const [supplier, setSupplier] = useState([]);
 
@@ -429,16 +462,18 @@ const UpdateProductById = () => {
         return alert("Fill all fields");
       }
 
-      const updateData = {
-        name,
-        category,
-        price,
-        stock,
-        barcode,
-        supplierId,
-      };
+      const formData = new FormData();
+      formData.append("name", name);
+      formData.append("category", category);
+      formData.append("price", price);
+      formData.append("stock", stock);
+      formData.append("barcode", barcode);
+      formData.append("supplierId", supplierId);
+      if (file) {
+        formData.append("image", file);
+      }
 
-      await updateProductById(id, updateData);
+      await updateProductById(id, formData);
 
       alert("Product updated successfully");
 
@@ -501,7 +536,7 @@ const UpdateProductById = () => {
         <select
           value={String(supplierId)}
           onChange={(e) => setSupplierId(String(e.target.value))}
-          className="w-full mb-6 p-3 rounded-xl outline-none"
+          className="w-full mb-4 p-3 rounded-xl outline-none"
         >
           <option value="">
             Select Supplier
@@ -516,6 +551,16 @@ const UpdateProductById = () => {
             </option>
           ))}
         </select>
+
+        <div className="mb-6 text-left">
+          <label className="block text-white mb-2 text-sm font-semibold">Update Product Image</label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => setFile(e.target.files[0])}
+            className="w-full p-2 bg-white/10 text-white rounded-xl outline-none border border-white/20"
+          />
+        </div>
 
         <button
           onClick={handleUpdate}

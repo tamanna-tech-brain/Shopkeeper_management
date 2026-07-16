@@ -1,6 +1,6 @@
 import Router from "express";
-import { validateAll } from "../middleware/validate.js";
-import *as supplierController from "../Controllers/supplier.js";
+import { validateAll } from "../Middleware/validate.js";
+import *as supplierController from "../Controllers/Supplier.js";
 import { supplierSchema, supplierUpdateSchema } from "../Validators/Supplier.js";
 const supplierRouter = Router();
 

@@ -1,6 +1,7 @@
+
 import axios from "axios";
 
-const Base_url = "http://localhost:3000/api";
+const Base_url = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
 
 const API = axios.create({
     baseURL : Base_url,
@@ -49,6 +50,10 @@ const handleError = (error) => {
 
 API.interceptors.response.use(handleResponse, handleError);
 AUTH_API.interceptors.response.use(handleResponse,handleError);
+
+export const getDashboardStats = async () => {
+    return await AUTH_API.get("/dashboard/stats");
+};
 
 export const register = (data) => 
     API.post("/user/register", data);
@@ -141,6 +146,14 @@ export const updateExpensesById = (id,data) =>
 
 export const deleteExpenseById = (id) =>
     API.delete(`/expense/delete/${id}`);
+
+export const createInvoice = (data) =>
+  AUTH_API.post("/invoice", data);
+
+export const getInvoiceById = (id) =>
+  AUTH_API.get(`/invoice/${id}`);
+
+export default API;
 
 
 

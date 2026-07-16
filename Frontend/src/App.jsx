@@ -1,15 +1,55 @@
-import React from 'react'
-import { Routes, Route , Navigate, Router } from "react-router-dom";
+import React from "react";
+import { Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 
 import UserGuard from "./components/UserGuard";
-import {Login, Register, UpdateUser} from "./pages/User";
-import {SupplierDashboard, CreateSupplier, GetSupplierById, UpdateSupplierById, DeleteSupplierById} from "./pages/Supplier";
-import { ProductDashboard, CreateProduct , GetAllProduct, GetProductById, UpdateProductById, DeleteProductById} from './pages/Product';
-import {CustomerDashboard, CreateCustomer,GetAllCustomer, GetCustomerById, UpdateCustomerById, DeleteCustomerById} from "./pages/Customer";
-import {CreateSales, SalesDashboard, GetAllSales, GetSalesById, UpdateSalesById, DeleteSalesById} from "./pages/Sales"
-import { ExpenseDashboard, CreateExpense, GetAllExpense, GetExpensesById, UpdateExpenseById, DeleteExpenseById } from './pages/Expense';
+import ProtectedRoute from "./routes/ProtectedRoute";
+import AdminRoute from "./routes/AdminRoute";
 
+import { Login, Register, UpdateUser } from "./pages/User";
+
+import {
+  SupplierDashboard,
+  CreateSupplier,
+  GetSupplierById,
+  UpdateSupplierById,
+  DeleteSupplierById,
+} from "./pages/Supplier";
+
+import {
+  ProductDashboard,
+  CreateProduct,
+  GetProductById,
+  UpdateProductById,
+  DeleteProductById,
+} from "./pages/Product";
+
+import {
+  CustomerDashboard,
+  CreateCustomer,
+  GetCustomerById,
+  UpdateCustomerById,
+  DeleteCustomerById,
+} from "./pages/Customer";
+
+import {
+  CreateSales,
+  SalesDashboard,
+  GetSalesById,
+  UpdateSalesById,
+  DeleteSalesById,
+} from "./pages/Sales";
+
+import {
+  ExpenseDashboard,
+  CreateExpense,
+  GetExpensesById,
+  UpdateExpenseById,
+  DeleteExpenseById,
+} from "./pages/Expense";
+
+import AdminDashboard from "./pages/AdminDashboard";
+import InvoicePage from "./pages/InvoicePage";
 
 const App = () => {
   return (
@@ -17,237 +57,280 @@ const App = () => {
       <Navbar />
 
       <Routes>
+        {/* AUTH */}
         <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/updateUser/:id"
-         element={
-         <UserGuard>
-          <UpdateUser/>
-         </UserGuard>} />
+
+        <Route
+          path="/updateUser/:id"
+          element={
+            <UserGuard>
+              <UpdateUser />
+            </UserGuard>
+          }
+        />
+
+        {/* ADMIN */}
+        <Route
+          path="/admin"
+          element={
+            <AdminRoute>
+              <AdminDashboard />
+            </AdminRoute>
+          }
+        />
+
+        {/* SUPPLIER */}
         <Route
           path="/supplier"
-            element={
-                <UserGuard>
-                    <SupplierDashboard />
-                </UserGuard>
-            }
+          element={
+            <ProtectedRoute>
+              <SupplierDashboard />
+            </ProtectedRoute>
+          }
         />
-        <Route path="/supplier/create"
-        element={
-          <UserGuard>
-            <CreateSupplier/>
-          </UserGuard>
-        }/>
-        
+
+        <Route
+          path="/supplier/create"
+          element={
+            <UserGuard>
+              <CreateSupplier />
+            </UserGuard>
+          }
+        />
+
         <Route
           path="/supplier/get/:id"
           element={
-          <UserGuard>
-            <GetSupplierById />
-          </UserGuard>
+            <UserGuard>
+              <GetSupplierById />
+            </UserGuard>
           }
         />
-        <Route path='/supplier/update/:id'
-         element={
-         <UserGuard>
-         <UpdateSupplierById/>
-         </UserGuard>
-         }
-         />
-         <Route
+
+        <Route
+          path="/supplier/update/:id"
+          element={
+            <UserGuard>
+              <UpdateSupplierById />
+            </UserGuard>
+          }
+        />
+
+        <Route
           path="/supplier/delete/:id"
           element={
             <UserGuard>
               <DeleteSupplierById />
             </UserGuard>
           }
-         />
-        
+        />
+
+        {/* PRODUCT */}
         <Route
           path="/product"
           element={
             <UserGuard>
-              <ProductDashboard/>
+              <ProductDashboard />
             </UserGuard>
           }
         />
 
         <Route
-        path='/product/create'
-        element={
-          <UserGuard>
-            <CreateProduct/>
-          </UserGuard>
-        }
-        />
-        <Route
-        path='/product/get/:id'
-        element={
-          <UserGuard>
-            <GetProductById/>
-          </UserGuard>
-        }
-        />
-        <Route
-        path='/product/update/:id'
-        element={
-          <UserGuard>
-            <UpdateProductById/>
-          </UserGuard>
-        }
-        />
-        <Route
-        path="/product/delete/:id"
-        element={<DeleteProductById/>} 
-        />
-        
-        <Route
-        path='/customer'
-        element={
-          <UserGuard>
-            <CustomerDashboard/>
-          </UserGuard>
-        }
+          path="/product/create"
+          element={
+            <UserGuard>
+              <CreateProduct />
+            </UserGuard>
+          }
         />
 
         <Route
-        path='/customer/create'
-        element={
-           <UserGuard>
-            <CreateCustomer/>
-           </UserGuard>
-        }
-        />
-        
-       <Route
-        path='/customer/get/:id'
-        element={
-           <UserGuard>
-            <GetCustomerById/>
-           </UserGuard>
-        }
+          path="/product/get/:id"
+          element={
+            <UserGuard>
+              <GetProductById />
+            </UserGuard>
+          }
         />
 
         <Route
-        path='/customer/update/:id'
-        element={
-           <UserGuard>
-            <UpdateCustomerById/>
-           </UserGuard>
-        }
+          path="/product/update/:id"
+          element={
+            <UserGuard>
+              <UpdateProductById />
+            </UserGuard>
+          }
         />
 
         <Route
-        path='/customer/delete/:id'
-        element={
-           <UserGuard>
-            <DeleteCustomerById/>
-           </UserGuard>
-        }
+          path="/product/delete/:id"
+          element={<DeleteProductById />}
+        />
+
+        {/* CUSTOMER */}
+        <Route
+          path="/customer"
+          element={
+            <UserGuard>
+              <CustomerDashboard />
+            </UserGuard>
+          }
         />
 
         <Route
-        path="/sales"
-        element={
+          path="/customer/create"
+          element={
+            <UserGuard>
+              <CreateCustomer />
+            </UserGuard>
+          }
+        />
+
+        <Route
+          path="/customer/get/:id"
+          element={
+            <UserGuard>
+              <GetCustomerById />
+            </UserGuard>
+          }
+        />
+
+        <Route
+          path="/customer/update/:id"
+          element={
+            <UserGuard>
+              <UpdateCustomerById />
+            </UserGuard>
+          }
+        />
+
+        <Route
+          path="/customer/delete/:id"
+          element={
+            <UserGuard>
+              <DeleteCustomerById />
+            </UserGuard>
+          }
+        />
+
+        {/* SALES */}
+        <Route
+          path="/sales"
+          element={
             <UserGuard>
               <SalesDashboard />
             </UserGuard>
-        }
+          }
         />
 
         <Route
-        path="/sales/create"
-        element={
+          path="/sales/create"
+          element={
             <UserGuard>
               <CreateSales />
             </UserGuard>
-        }
+          }
         />
 
         <Route
-        path="/sales/get/:id"
-        element={
+          path="/sales/get/:id"
+          element={
             <UserGuard>
-                <GetSalesById />
+              <GetSalesById />
             </UserGuard>
-        }
+          }
         />
 
         <Route
           path="/sales/update/:id"
           element={
-              <UserGuard>
-                  <UpdateSalesById />
-              </UserGuard>
+            <UserGuard>
+              <UpdateSalesById />
+            </UserGuard>
           }
         />
 
         <Route
-        path="/sales/delete/:id"
-        element={
+          path="/sales/delete/:id"
+          element={
             <UserGuard>
-               <DeleteSalesById />
+              <DeleteSalesById />
             </UserGuard>
-        }
+          }
         />
 
+        {/* EXPENSE */}
         <Route
-        path="/expense"
-        element={
+          path="/expense"
+          element={
             <UserGuard>
               <ExpenseDashboard />
             </UserGuard>
-        }
+          }
         />
 
         <Route
-        path="/expense/create"
-        element={
+          path="/expense/create"
+          element={
             <UserGuard>
               <CreateExpense />
             </UserGuard>
-        }
+          }
         />
 
         <Route
-        path="/expense/get/:id"
-        element={
+          path="/expense/get/:id"
+          element={
             <UserGuard>
-                <GetExpensesById/>
+              <GetExpensesById />
             </UserGuard>
-        }
+          }
         />
 
         <Route
           path="/expense/update/:id"
           element={
-              <UserGuard>
-                  <UpdateExpenseById />
-              </UserGuard>
+            <UserGuard>
+              <UpdateExpenseById />
+            </UserGuard>
           }
         />
 
         <Route
-        path="/expense/delete/:id"
-        element={
-            <UserGuard>
-               <DeleteExpenseById />
-            </UserGuard>
-        }
-        />
-
-        <Route     
-          path="/user" 
+          path="/expense/delete/:id"
           element={
             <UserGuard>
-            <h1 className="text-white text-center mt-10">User Dashboard</h1>
+              <DeleteExpenseById />
             </UserGuard>
-          } 
+          }
+        />
+
+        {/* USER */}
+        <Route
+          path="/user"
+          element={
+            <UserGuard>
+              <h1 className="text-white text-center mt-10">
+                User Dashboard
+              </h1>
+            </UserGuard>
+          }
+        />
+
+        {/* INVOICE */}
+        <Route
+          path="/invoice/:id"
+          element={
+            <UserGuard>
+              <InvoicePage />
+            </UserGuard>
+          }
         />
       </Routes>
     </>
-  )
-}
+  );
+};
 
-export default App
+export default App;

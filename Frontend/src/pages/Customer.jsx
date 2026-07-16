@@ -66,10 +66,7 @@ const CreateCustomer = () => {
         })
       navigate("/customer");
     } catch (error) {
-      return res.status(400).json({
-        success : false,
-        message: error.message
-      })
+      alert(error.response?.data?.message || error.message);
     }
   };
 

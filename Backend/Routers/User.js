@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { validateAll } from "../middleware/validate.js";
-import * as userController from "../Controllers/user.js";
+import { validateAll } from "../Middleware/validate.js";
+import * as userController from "../Controllers/User.js";
 import {
   updateUserSchema,
   registerSchema,
@@ -13,13 +13,13 @@ const userRouter = Router();
 userRouter.post(
   "/register",
   validateAll(registerSchema),
-  userController.register
+  userController.registerUser
 );
 
 userRouter.post(
   "/login",
   validateAll(loginSchema),
-  userController.login
+  userController.loginUser
 );
 
 userRouter.get(

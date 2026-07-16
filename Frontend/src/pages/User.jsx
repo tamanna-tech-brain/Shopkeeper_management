@@ -92,82 +92,89 @@ const Register = () => {
   );
 };
 
+
+import { useDispatch, useSelector } from "react-redux";
+
+import { loginUser } from "../redux/authSlice.js";
+
+
 const Login = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const navigate = useNavigate();
 
-  const handleLogin = async () => {
+    const dispatch = useDispatch();
 
-  console.log("LOGIN FUNCTION STARTED");
-    try {
-      if (!email || !password) {
-        alert("Fill all fields");
-        return;
-      }
+    const navigate = useNavigate();
 
-      const res = await login({ email, password });
-      console.log("LOGIN RESPONSE ", res.data);
+    const { loading, error } = useSelector(
+        (state) => state.auth
+    );
 
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("role", res.data.data.role || "user");
-      localStorage.setItem("userId", res.data.data._id);
-      alert("Login successful");
-      navigate(`/updateUser/${res.data.data._id}`);
+    const [email,setEmail] = useState("");
+    const [password,setPassword] = useState("");
 
-    } catch (error) {
-      alert(error.response?.data?.message || "Login failed");
-    }
-  };
+    const handleLogin = async () => {
 
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-tr from-indigo-900 via-purple-900 to-pink-900">
+        const result = await dispatch(
+            loginUser({
+                email,
+                password,
+            })
+        );
 
-    <div className="w-full max-w-md p-8 rounded-3xl backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl">
+        if(result.meta.requestStatus === "fulfilled"){
+            alert("Login Success");
+            navigate("/");
+        }
+    };
 
-    <h2 className="text-3xl font-bold text-white text-center mb-2">
-    Welcome Back
-    </h2>
-    <p className="text-gray-300 text-center mb-6 text-sm">
-    Login to your shop dashboard
-    </p>
+    return (
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-tr from-indigo-900 via-purple-900 to-pink-900">
+            <div className="w-full max-w-md p-8 rounded-3xl backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl">
+                <h2 className="text-3xl font-bold text-white text-center mb-2">
+                    Welcome Back
+                </h2>
+                <p className="text-gray-300 text-center mb-6 text-sm">
+                    Log in to manage your shopkeeper account
+                </p>
 
-    <input
-      placeholder="Email Address"
-      value={email}
-      onChange={(e) => setEmail(e.target.value)}
-      className="w-full mb-4 p-3 rounded-xl bg-white/20 text-white placeholder-gray-300 outline-none focus:ring-2 focus:ring-indigo-400"
-    />
+                <input
+                    placeholder="Email Address"
+                    value={email}
+                    onChange={(e)=>setEmail(e.target.value)}
+                    className="w-full mb-4 p-3 rounded-xl bg-white/20 text-white placeholder-gray-300 outline-none focus:ring-2 focus:ring-pink-400"
+                />
 
-    <input
-      type="password"
-      placeholder="Password"
-      value={password}
-      onChange={(e) => setPassword(e.target.value)}
-      className="w-full mb-6 p-3 rounded-xl bg-white/20 text-white placeholder-gray-300 outline-none focus:ring-2 focus:ring-indigo-400"
-    />
+                <input
+                    type="password"
+                    placeholder="Password"
+                    value={password}
+                    onChange={(e)=>setPassword(e.target.value)}
+                    className="w-full mb-6 p-3 rounded-xl bg-white/20 text-white placeholder-gray-300 outline-none focus:ring-2 focus:ring-pink-400"
+                />
 
-    <button
-      onClick={handleLogin}
-      className="w-full py-3 rounded-xl font-semibold bg-gradient-to-r from-indigo-500 to-purple-500 hover:scale-105 transition transform shadow-lg"
-    >
-      Login
-    </button>
+                <button 
+                    onClick={handleLogin}
+                    className="w-full py-3 rounded-xl font-semibold bg-gradient-to-r from-pink-500 to-purple-500 hover:scale-105 transition transform shadow-lg text-white"
+                >
+                    {loading ? "Loading..." : "Login"}
+                </button>
 
-    <p className="text-center mt-5 text-gray-300 text-sm">
-      New user?{" "}
-      <span
-        onClick={() => navigate("/register")}
-        className="text-indigo-400 cursor-pointer hover:underline"
-      >
-        Create account
-      </span>
-    </p>
+                {error && <p className="text-red-400 text-center mt-4 text-sm">{error}</p>}
 
-  </div>
-</div>
-  );
+                <p className="text-center mt-5 text-gray-300 text-sm">
+                    Don't have an account?{" "}
+                    <span
+                        onClick={() => navigate("/register")}
+                        className="text-pink-400 cursor-pointer hover:underline"
+                    >
+                        Register
+                    </span>
+                </p>
+            </div>
+        </div>
+    );
 };
+
+export default Login;
 
 const UpdateUser = () => {
     const { id } = useParams();

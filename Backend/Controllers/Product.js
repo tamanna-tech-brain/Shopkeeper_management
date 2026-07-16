@@ -1,26 +1,33 @@
 import productModel from "../Models/Product.js"
 import { getPagination } from "../utils/Pagination.js";
 import { getSearchMatch } from "../utils/search.js";
-export async function createProduct(req, res){
-    try{
-        const { name, category, price, stock, barcode, supplierId} = req.body;
-        const productCreate = await productModel.create({
-            name, category, price, stock, barcode, supplierId
-        });
-        return res.status(201).json({
-            success: true,
-            data: productCreate,
-            message: " product created successfully"
-    });
-    }
-    catch (error) {
-        return res.status(400).json({
-        success: false,
-        message: error.message
-  });
-}
-}
+export const createProduct = async (req, res) => {
+  try {
+    const { name, price, stock, category, barcode, supplierId } = req.body;
 
+    const imageUrl = req.file?.path;
+
+    const product = await productModel.create({
+      name,
+      price,
+      stock,
+      category,
+      barcode,
+      supplierId,
+      image: imageUrl,
+    });
+
+    res.status(201).json({
+      success: true,
+      data: product,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 export async function getProduct(req, res) {
     try{
         const {page, limit, skip} = getPagination(req.query);
@@ -70,6 +77,9 @@ export async function getProductById(req, res) {
 export async function updateProductById(req, res){
     try{
         const { id } = req.params;
+        if (req.file?.path) {
+            req.body.image = req.file.path;
+        }
         const productUpdated = await productModel.findByIdAndUpdate(id, req.body, {new: true});
         if (!productUpdated) {
             return res.status(404).json({

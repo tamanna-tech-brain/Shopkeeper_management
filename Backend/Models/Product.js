@@ -24,7 +24,10 @@ const productSchema = new mongoose.Schema({
     supplierId: {type: mongoose.Schema.Types.ObjectId,
         ref: "suppliers",
         required: true
-    }
+    },
+     image: {
+    type: String, // Cloudinary URL
+  },
 },{
      timestamps: true,
 });

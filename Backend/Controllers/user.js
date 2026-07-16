@@ -2,89 +2,85 @@ import userModel from "../Models/User.js"
 import { authMiddleware } from "../Middleware/userMiddleware.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt"; 
+import { generateAccessToken } from "../services/service.js";
 
-export async function register (req, res){
+
+export const registerUser = async (req,res) => {
+
     try{
-        const {name, email, password } = req.body;
-        const normalizedEmail = email.toLowerCase();
-        const existingUser = await userModel.findOne({email: normalizedEmail});
+
+        const { name, email, password } = req.body;
+
+        const existingUser = await userModel.findOne({ email });
+
         if(existingUser){
             return res.status(400).json({
-                success: false,
-                message : "User already exists"
+                success:false,
+                message:"User already exists"
             });
         }
-        const hashedPassword = await bcrypt.hash(password, 10);
+
         const user = await userModel.create({
             name,
-            email: normalizedEmail,
-            password: hashedPassword
+            email,
+            password
         });
-        let accessToken = jwt.sign({ id: user._id}, process.env.JWT_SECRET,
-            {
-                expiresIn: "1d"
-            }
-        );
-        res.cookie("accessToken", accessToken, {
-            httpOnly: true,
-            secure: false,
-            sameSite: "strict",
-            maxAge: 7 * 24 * 60 * 30 * 1000
-        });
-        res.status(200).json({
-            success: true,
-            data: user,
-            message: "User registered successfully"
-        });
-    }
-    catch (error) {
-        res.status(400).json({
-            success: false,
-            message: error.message
-        });
-    }
-}
 
-export async function login (req , res) {
+        const token = generateAccessToken(user);
+
+        res.status(201).json({
+            success:true,
+            token,
+            data:user
+        });
+
+    }catch(error){
+        res.status(500).json({
+            success:false,
+            message:error.message
+        });
+    }
+};
+
+export const loginUser = async (req,res) => {
+
     try{
-        const { email , password} = req.body;
-        const normalizedEmail = email.toLowerCase();
-        const user = await userModel.findOne({email : normalizedEmail});
-        if (!user || !(await bcrypt.compare(password, user.password))){
+
+        const { email,password } = req.body;
+
+        const user = await userModel.findOne({ email });
+
+        if(!user){
             return res.status(400).json({
-                success: false,
-                message: "Invalid email or password"
+                success:false,
+                message:"Invalid Email"
             });
         }
-        let accessToken = jwt.sign({
-        id: user._id,
-        },
-        process.env.JWT_SECRET,
-        {
-            expiresIn: "1d"
+
+        const isMatch = await user.comparePassword(password);
+
+        if(!isMatch){
+            return res.status(400).json({
+                success:false,
+                message:"Invalid Password"
+            });
         }
-    )
-    res.cookie("accessToken", accessToken, {
-        httpOnly: true,
-        secure: false,
-        sameSite: "strict",
-        maxAge: 7* 24 * 60 * 60 * 1000
-    })
-    return res.status(200).json({
-        success: true,
-        data: user,
-        token: accessToken,
-        message: "User Logged In Success "
-    });
-    console.log("LOGIN RESPONSE:", res.data);
-    }
-    catch(error) {
-        res.status(400).json({
-            success: false,
-            message: error.message
+
+        const token = generateAccessToken(user);
+
+        res.status(200).json({
+            success:true,
+            token,
+            data:user
+        });
+
+    }catch(error){
+        res.status(500).json({
+            success:false,
+            message:error.message
         });
     }
-}
+};
 
 export async function getUserById(req, res) {
     try{
