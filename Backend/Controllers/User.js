@@ -10,6 +10,7 @@ export const registerUser = async (req,res) => {
     try{
 
         const { name, email, password, role } = req.body;
+        const image = req.file?.path || (req.file?.filename ? `/uploads/${req.file.filename}` : req.body.image || "");
 
         const existingUser = await userModel.findOne({ email });
 
@@ -24,7 +25,8 @@ export const registerUser = async (req,res) => {
             name,
             email,
             password,
-            role: role || "admin"
+            role: role || "admin",
+            image
         });
 
         const token = generateAccessToken(user);
@@ -109,11 +111,15 @@ export async function getUserById(req, res) {
 export async function updateUserById(req, res) {
     try {
         const { id } = req.params;
-        if (req.body.password) {
-            const salt = await bcrypt.genSalt(10);
-            req.body.password = await bcrypt.hash(req.body.password, salt);
+        const updateData = { ...req.body };
+        if (req.file) {
+            updateData.image = req.file.path || (req.file.filename ? `/uploads/${req.file.filename}` : undefined);
         }
-        const updateUser = await userModel.findByIdAndUpdate(id, req.body, { new: true }).select("-password");
+        if (updateData.password) {
+            const salt = await bcrypt.genSalt(10);
+            updateData.password = await bcrypt.hash(updateData.password, salt);
+        }
+        const updateUser = await userModel.findByIdAndUpdate(id, updateData, { new: true }).select("-password");
         if (!updateUser) {
             return res.status(404).json({
                 success: false,

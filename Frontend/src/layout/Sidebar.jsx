@@ -14,6 +14,7 @@ import {
   FaStore,
   FaUserCog,
   FaPlus,
+  FaHandsHelping,
 } from "react-icons/fa";
 
 const Sidebar = ({ isOpen = true, onClose = () => {} }) => {
@@ -63,6 +64,11 @@ const Sidebar = ({ isOpen = true, onClose = () => {} }) => {
       path: "/expense",
       icon: <FaReceipt className="w-4 h-4" />,
       createPath: "/expense/create",
+    },
+    {
+      name: "Grievances & Welfare",
+      path: "/complaints",
+      icon: <FaHandsHelping className="w-4 h-4" />,
     },
   ];
 

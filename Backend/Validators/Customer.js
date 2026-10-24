@@ -4,11 +4,13 @@ export const customerSchema = joi.object({
     name: joi.string().min(4).max(60).required(),
     phone: joi.string().pattern(/^[0-9]{10}$/).required(),
     address: joi.string().min(4).max(60).required(),
+    image: joi.string().allow("", null).optional(),
 });
 
 export const customerUpdateSchema = joi.object({
     name: joi.string().min(4).max(60).optional(),
     phone: joi.string().pattern(/^[0-9]{10}$/).optional(),
     address: joi.string().min(4).max(60).optional(),
+    image: joi.string().allow("", null).optional(),
 });
 export default {customerSchema, customerUpdateSchema};

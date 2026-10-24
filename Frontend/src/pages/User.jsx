@@ -346,6 +346,8 @@ const UserProfile = () => {
   const [name, setName] = useState(storedUser.name || "");
   const [email, setEmail] = useState(storedUser.email || "");
   const [password, setPassword] = useState("");
+  const [avatarFile, setAvatarFile] = useState(null);
+  const [avatarPreview, setAvatarPreview] = useState(storedUser.image || null);
   const [saving, setSaving] = useState(false);
 
   const fetchUser = async (id) => {
@@ -355,6 +357,9 @@ const UserProfile = () => {
         setUser(res.data.data);
         setName(res.data.data.name || "");
         setEmail(res.data.data.email || "");
+        if (res.data.data.image) {
+          setAvatarPreview(res.data.data.image);
+        }
       }
     } catch (err) {
       console.warn("Could not fetch user by id:", err);
@@ -366,6 +371,14 @@ const UserProfile = () => {
       fetchUser(userId);
     }
   }, [userId]);
+
+  const handleAvatarChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setAvatarFile(file);
+      setAvatarPreview(URL.createObjectURL(file));
+    }
+  };
 
   const handleUpdate = async (e) => {
     if (e) e.preventDefault();
@@ -384,13 +397,15 @@ const UserProfile = () => {
       }
 
       setSaving(true);
-      const payload = {
-        name: name.trim(),
-        email: email.trim(),
-        password,
-      };
+      const formData = new FormData();
+      formData.append("name", name.trim());
+      formData.append("email", email.trim());
+      formData.append("password", password);
+      if (avatarFile) {
+        formData.append("image", avatarFile);
+      }
 
-      const res = await updateUserById(userId, payload);
+      const res = await updateUserById(userId, formData);
       toast.success("Profile updated successfully!");
 
       const updated = res.data?.data || { ...user, name: name.trim(), email: email.trim() };
@@ -410,8 +425,12 @@ const UserProfile = () => {
       {/* Profile Header Card */}
       <div className="glass-card rounded-3xl p-6 sm:p-8 border border-slate-800 bg-slate-900/60 shadow-xl flex flex-col sm:flex-row items-center sm:items-start justify-between gap-6">
         <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5 text-center sm:text-left">
-          <div className="w-20 h-20 rounded-2xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-pink-600 text-white font-black text-3xl flex items-center justify-center shadow-xl shadow-indigo-600/25">
-            {user?.name ? user.name[0].toUpperCase() : "U"}
+          <div className="w-20 h-20 rounded-2xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-pink-600 text-white font-black text-3xl flex items-center justify-center shadow-xl shadow-indigo-600/25 overflow-hidden">
+            {avatarPreview || user?.image ? (
+              <img src={avatarPreview || user.image} alt={user.name} className="w-full h-full object-cover" />
+            ) : (
+              user?.name ? user.name[0].toUpperCase() : "U"
+            )}
           </div>
 
           <div>
@@ -480,6 +499,18 @@ const UserProfile = () => {
             helperText="Password is required to confirm profile changes."
             required
           />
+
+          <div className="text-left">
+            <label className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
+              Profile Picture / Store Avatar
+            </label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleAvatarChange}
+              className="w-full text-xs text-slate-400 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500"
+            />
+          </div>
 
           <div className="pt-4 border-t border-slate-800 flex justify-end">
             <Button

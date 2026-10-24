@@ -153,8 +153,12 @@ const GetAllCustomer = () => {
               <div>
                 {/* Header: Avatar and Name */}
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-600 text-white font-extrabold text-base flex items-center justify-center shrink-0 shadow-md">
-                    {c.name ? c.name[0].toUpperCase() : "C"}
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-600 text-white font-extrabold text-base flex items-center justify-center shrink-0 shadow-md overflow-hidden">
+                    {c.image ? (
+                      <img src={c.image} alt={c.name} className="w-full h-full object-cover" />
+                    ) : (
+                      c.name ? c.name[0].toUpperCase() : "C"
+                    )}
                   </div>
                   <div className="overflow-hidden">
                     <h3 className="text-base font-bold text-white tracking-tight truncate">
@@ -250,6 +254,8 @@ const CreateCustomer = () => {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const nameRef = useRef();
@@ -257,6 +263,14 @@ const CreateCustomer = () => {
   useEffect(() => {
     nameRef.current?.focus();
   }, []);
+
+  const handleImageChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
 
   const handleSubmit = async (e) => {
     if (e) e.preventDefault();
@@ -285,11 +299,15 @@ const CreateCustomer = () => {
 
       setLoading(true);
 
-      await createCustomer({
-        name: name.trim(),
-        phone: cleanPhone,
-        address: address.trim(),
-      });
+      const formData = new FormData();
+      formData.append("name", name.trim());
+      formData.append("phone", cleanPhone);
+      formData.append("address", address.trim());
+      if (imageFile) {
+        formData.append("image", imageFile);
+      }
+
+      await createCustomer(formData);
 
       toast.success("Customer registered successfully!");
       navigate("/customer");
@@ -354,6 +372,23 @@ const CreateCustomer = () => {
             required
             className="w-full rounded-xl py-2.5 px-3.5 text-sm glass-input border border-slate-800 focus:border-indigo-500"
           />
+        </div>
+
+        <div className="text-left">
+          <label className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
+            Customer Photo / ID Proof (Optional)
+          </label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleImageChange}
+            className="w-full text-xs text-slate-400 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500"
+          />
+          {imagePreview && (
+            <div className="mt-2.5 relative w-20 h-20 rounded-xl overflow-hidden border border-slate-700 shadow-md">
+              <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+            </div>
+          )}
         </div>
 
         <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
@@ -529,6 +564,8 @@ const UpdateCustomerById = () => {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -541,6 +578,9 @@ const UpdateCustomerById = () => {
         setName(data.name || "");
         setPhone(data.phone || "");
         setAddress(data.address || "");
+        if (data.image) {
+          setImagePreview(data.image);
+        }
       }
     } catch (error) {
       console.error(error);
@@ -553,6 +593,14 @@ const UpdateCustomerById = () => {
   useEffect(() => {
     fetchCustomer();
   }, [id]);
+
+  const handleImageChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
 
   const handleUpdate = async (e) => {
     if (e) e.preventDefault();
@@ -579,11 +627,15 @@ const UpdateCustomerById = () => {
       }
 
       setSaving(true);
-      await updateCustomerById(id, {
-        name: name.trim(),
-        phone: cleanPhone,
-        address: address.trim(),
-      });
+      const formData = new FormData();
+      formData.append("name", name.trim());
+      formData.append("phone", cleanPhone);
+      formData.append("address", address.trim());
+      if (imageFile) {
+        formData.append("image", imageFile);
+      }
+
+      await updateCustomerById(id, formData);
       toast.success("Customer updated successfully");
       navigate(`/customer/get/${id}`);
     } catch (error) {
@@ -646,6 +698,23 @@ const UpdateCustomerById = () => {
             required
             className="w-full rounded-xl py-2.5 px-3.5 text-sm glass-input border border-slate-800 focus:border-indigo-500"
           />
+        </div>
+
+        <div className="text-left">
+          <label className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
+            Customer Photo / ID Proof
+          </label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleImageChange}
+            className="w-full text-xs text-slate-400 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500"
+          />
+          {imagePreview && (
+            <div className="mt-2.5 relative w-20 h-20 rounded-xl overflow-hidden border border-slate-700 shadow-md">
+              <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+            </div>
+          )}
         </div>
 
         <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">

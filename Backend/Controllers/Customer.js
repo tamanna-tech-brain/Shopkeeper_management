@@ -5,13 +5,10 @@ import {getSearchMatch} from "../utils/search.js"
 export async function createCustomer(req, res) {
     try{
     const {name, phone, address} = req.body;
-    console.log("body to create", {
-            name , phone, address
-        })
+    const image = req.file?.path || (req.file?.filename ? `/uploads/${req.file.filename}` : req.body.image || "");
     const customerCreate = await customerModel.create({
-        name,phone,address
+        name, phone, address, image
     });
-    console.log("after  create", customerCreate)
     return res.status(201).json({
         success: true,
         data: customerCreate,
@@ -75,7 +72,11 @@ export async function getCustomerById(req, res) {
 export async function updateCustomerById(req, res){
     try{
         const { id } = req.params;
-        const customerUpdated = await customerModel.findByIdAndUpdate(id, req.body, {new: true});
+        const updateData = { ...req.body };
+        if (req.file) {
+            updateData.image = req.file.path || (req.file.filename ? `/uploads/${req.file.filename}` : undefined);
+        }
+        const customerUpdated = await customerModel.findByIdAndUpdate(id, updateData, {new: true});
         if (!customerUpdated) {
             return res.status(404).json({
                 success: false,

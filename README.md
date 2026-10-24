@@ -48,7 +48,28 @@ Categorized operational cost ledger tracking utility bills, payroll, store rent,
 
 ---
 
-### 🔐 7. Secure Authentication Portal
+### 🤝 7. Customer & Supplier Welfare / Grievance Resolution Board
+Centralized ticket tracker handling customer complaints, vendor disputes, staff welfare, and product quality issues with SLA resolution metrics, priority filters, and attached evidence photos.
+
+![Grievances and Welfare Resolution Board](./screenshots/complaints_welfare_page.png)
+
+---
+
+### 📝 8. Grievance Filing & Welfare Ticket Modal
+Streamlined grievance lodging workflow supporting document attachments, category tagging (Customer, Supplier, Staff Welfare, Product Quality, Store Operations), and priority assignment.
+
+![Grievance Filing Modal Flow](./screenshots/complaint_modal_flow.png)
+
+---
+
+### 👤 9. Store Administrator Profile & Avatar Management
+Store settings interface with profile photo upload, store administrator credentials, and password-authenticated updates.
+
+![Store Admin Profile](./screenshots/user_profile_page.png)
+
+---
+
+### 🔐 10. Secure Authentication Portal
 Glassmorphic authentication interface with password visibility toggle, credential validation, and JWT session handling.
 
 ![Sign In Portal](./screenshots/login_page.png)
@@ -57,6 +78,14 @@ Glassmorphic authentication interface with password visibility toggle, credentia
 
 ## 🚀 Key Features
 
+- **Customer, Supplier & Staff Welfare Grievance Resolution**: End-to-end grievance resolution tracker for customer disputes, supplier delivery errors, staff working conditions, and product quality reports. Features full ticket lifecycle management (`Pending` -> `In Review` -> `Resolved` / `Rejected`), resolution audit notes, SLA performance percentage, and photo/bill evidence attachments.
+- **Universal Multi-Part Image Upload System**: Seamless file upload capabilities integrated across the entire ecosystem:
+  - **Product Catalog**: High-resolution item photos.
+  - **Customer CRM**: Client photos and ID documentation.
+  - **Supplier Directory**: Vendor company logos and supply contracts.
+  - **Expense Ledger**: Attached physical receipts and utility bills.
+  - **Store Profile**: Store administrator avatars.
+  - *Storage architecture automatically routes to Cloudinary when configured, with a resilient local disk storage fallback.*
 - **Point of Sale (POS) Terminal with Multi-Item Cart**: Rapid checkout counter allowing shopkeepers to add multiple items, adjust item quantities with `[+]` / `[-]`, and view real-time line subtotals and grand totals.
 - **Automated Inventory Stock Decrement**: Selling items automatically decrements available warehouse/shelf quantities via MongoDB `$inc`. Deleting a sale automatically restores inventory stock.
 - **Low-Stock Alert Dashboard Banner**: Automatically flags products with fewer than 10 units remaining so store managers can restock before stockouts occur.
@@ -131,7 +160,7 @@ npm run dev:frontend
    npm install --legacy-peer-deps
    ```
 
-3. Create a `.env` file based on `.env.example`:
+3. Create a `.env` file in `Backend/.env`:
    ```env
    PORT=3000
    MONGO_URI="mongodb+srv://<username>:<password>@cluster0.mongodb.net/shopkeeper_management?retryWrites=true&w=majority"
@@ -162,7 +191,7 @@ npm run dev:frontend
    npm install
    ```
 
-3. Create a `.env` file based on `.env.example`:
+3. Create a `.env` file in `Frontend/.env`:
    ```env
    VITE_API_URL=http://localhost:3000/api
    VITE_SOCKET_URL=http://localhost:3000
@@ -279,6 +308,15 @@ The repository includes a ready-to-use [`render.yaml`](./render.yaml) blueprint.
 | `POST` | `/api/invoice` | Generate linked tax invoice | Admin, Staff |
 | `GET` | `/api/invoice/:id` | Fetch tax invoice by ID | Yes |
 | `GET` | `/api/dashboard/stats` | Aggregate dashboard KPI metrics | Admin |
+
+### 🤝 Grievances & Welfare Resolution (`/api/complaint`)
+| Method | Endpoint | Description | Auth Required |
+|---|---|---|---|
+| `GET` | `/api/complaint/get` | List grievances with category and status filters | No |
+| `GET` | `/api/complaint/get/:id` | Retrieve detailed grievance record by ID | No |
+| `POST` | `/api/complaint/create` | File new grievance (supports multipart evidence image) | No |
+| `PUT` | `/api/complaint/resolve/:id` | Update status, audit resolution note, resolve grievance | No |
+| `DELETE` | `/api/complaint/delete/:id` | Delete grievance record | No |
 
 ---
 

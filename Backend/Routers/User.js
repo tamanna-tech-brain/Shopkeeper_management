@@ -8,10 +8,13 @@ import {
   getUserIdSchema
 } from "../Validators/User.js";
 
+import upload from "../Middleware/upload.js";
+
 const userRouter = Router();
 
 userRouter.post(
   "/register",
+  upload.single("image"),
   validateAll(registerSchema),
   userController.registerUser
 );
@@ -30,6 +33,7 @@ userRouter.get(
 
 userRouter.put(
   "/update/:id",
+  upload.single("image"),
   validateAll(updateUserSchema),
   userController.updateUserById
 );

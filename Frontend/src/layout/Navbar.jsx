@@ -83,6 +83,8 @@ const Navbar = ({ onOpenSidebar }) => {
       return { title: "Record Expense", category: "Finance" };
     if (path.startsWith("/expense"))
       return { title: "Expense Tracker", category: "Finance" };
+    if (path.startsWith("/complaints"))
+      return { title: "Grievances & Welfare", category: "Support" };
     if (path.startsWith("/user"))
       return { title: "Account & Settings", category: "Profile" };
     if (path.startsWith("/invoice"))

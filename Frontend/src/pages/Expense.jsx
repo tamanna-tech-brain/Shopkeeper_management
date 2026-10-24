@@ -244,6 +244,20 @@ const GetAllExpense = () => {
                     {exp.title}
                   </h3>
 
+                  {exp.receiptImage && (
+                    <div className="pt-1">
+                      <a
+                        href={exp.receiptImage}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 hover:text-white"
+                      >
+                        <FaImage className="w-3 h-3" />
+                        <span>View Attached Bill</span>
+                      </a>
+                    </div>
+                  )}
+
                   <div className="flex items-center gap-1.5 text-xs text-slate-400">
                     <FaCalendarAlt className="w-3 h-3 text-slate-400" />
                     <span>
@@ -316,6 +330,8 @@ const CreateExpense = () => {
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState("Utilities");
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+  const [receiptFile, setReceiptFile] = useState(null);
+  const [receiptPreview, setReceiptPreview] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const titleRef = useRef();
@@ -323,6 +339,14 @@ const CreateExpense = () => {
   useEffect(() => {
     titleRef.current?.focus();
   }, []);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setReceiptFile(file);
+      setReceiptPreview(URL.createObjectURL(file));
+    }
+  };
 
   const categories = [
     "Rent",
@@ -357,12 +381,16 @@ const CreateExpense = () => {
 
       setLoading(true);
 
-      await createExpense({
-        title: title.trim(),
-        amount: Number(amount),
-        category: category.trim(),
-        date: date || new Date().toISOString(),
-      });
+      const formData = new FormData();
+      formData.append("title", title.trim());
+      formData.append("amount", Number(amount));
+      formData.append("category", category.trim());
+      formData.append("date", date || new Date().toISOString());
+      if (receiptFile) {
+        formData.append("receiptImage", receiptFile);
+      }
+
+      await createExpense(formData);
 
       toast.success("Expense logged successfully!");
       navigate("/expense");
@@ -442,6 +470,23 @@ const CreateExpense = () => {
           onChange={(e) => setDate(e.target.value)}
           required
         />
+
+        <div className="text-left">
+          <label className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
+            Bill / Receipt Image (Optional)
+          </label>
+          <input
+            type="file"
+            accept="image/*,application/pdf"
+            onChange={handleFileChange}
+            className="w-full text-xs text-slate-400 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500"
+          />
+          {receiptPreview && (
+            <div className="mt-2.5 relative w-20 h-20 rounded-xl overflow-hidden border border-slate-700 shadow-md">
+              <img src={receiptPreview} alt="Preview" className="w-full h-full object-cover" />
+            </div>
+          )}
+        </div>
 
         <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
           <Button
@@ -618,6 +663,8 @@ const UpdateExpenseById = () => {
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState("");
   const [date, setDate] = useState("");
+  const [receiptFile, setReceiptFile] = useState(null);
+  const [receiptPreview, setReceiptPreview] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -633,6 +680,9 @@ const UpdateExpenseById = () => {
         if (exp.date) {
           setDate(new Date(exp.date).toISOString().split("T")[0]);
         }
+        if (exp.receiptImage) {
+          setReceiptPreview(exp.receiptImage);
+        }
       }
     } catch (error) {
       console.error(error);
@@ -645,6 +695,14 @@ const UpdateExpenseById = () => {
   useEffect(() => {
     fetchExpense();
   }, [id]);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setReceiptFile(file);
+      setReceiptPreview(URL.createObjectURL(file));
+    }
+  };
 
   const categories = [
     "Rent",
@@ -678,12 +736,16 @@ const UpdateExpenseById = () => {
       }
 
       setSaving(true);
-      await updateExpensesById(id, {
-        title: title.trim(),
-        amount: Number(amount),
-        category: category.trim(),
-        date: date || new Date().toISOString(),
-      });
+      const formData = new FormData();
+      formData.append("title", title.trim());
+      formData.append("amount", Number(amount));
+      formData.append("category", category.trim());
+      formData.append("date", date || new Date().toISOString());
+      if (receiptFile) {
+        formData.append("receiptImage", receiptFile);
+      }
+
+      await updateExpensesById(id, formData);
       toast.success("Expense updated successfully");
       navigate(`/expense/get/${id}`);
     } catch (error) {
@@ -761,6 +823,23 @@ const UpdateExpenseById = () => {
           onChange={(e) => setDate(e.target.value)}
           required
         />
+
+        <div className="text-left">
+          <label className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
+            Bill / Receipt Image
+          </label>
+          <input
+            type="file"
+            accept="image/*,application/pdf"
+            onChange={handleFileChange}
+            className="w-full text-xs text-slate-400 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500"
+          />
+          {receiptPreview && (
+            <div className="mt-2.5 relative w-20 h-20 rounded-xl overflow-hidden border border-slate-700 shadow-md">
+              <img src={receiptPreview} alt="Preview" className="w-full h-full object-cover" />
+            </div>
+          )}
+        </div>
 
         <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
           <Button

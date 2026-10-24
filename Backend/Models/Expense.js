@@ -13,6 +13,10 @@ const expenseSchema = new mongoose.Schema({
         type: String,
         required : true
     },
+    receiptImage: {
+        type: String,
+        default: ""
+    },
     date: {
         type: Date, default: Date.now
     }

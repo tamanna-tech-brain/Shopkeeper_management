@@ -171,4 +171,21 @@ export const createInvoice = (data) => AUTH_API.post("/invoice", data);
 
 export const getInvoiceById = (id) => AUTH_API.get(`/invoice/${id}`);
 
+// ============ Complaints & Welfare Resolution ============ //
+export const createComplaint = (data) => API.post("/complaint/create", data);
+
+export const getComplaints = (page = 1, limit = 8, search = "", status = "all", type = "all") =>
+  API.get(
+    `/complaint/get?page=${page}&limit=${limit}&search=${encodeURIComponent(
+      search
+    )}&status=${status}&type=${type}`
+  );
+
+export const getComplaintById = (id) => API.get(`/complaint/get/${id}`);
+
+export const resolveComplaint = (id, data) =>
+  API.put(`/complaint/resolve/${id}`, data);
+
+export const deleteComplaint = (id) => API.delete(`/complaint/delete/${id}`);
+
 export default API;

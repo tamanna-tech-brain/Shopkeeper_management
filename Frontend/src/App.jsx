@@ -50,6 +50,7 @@ import {
 
 import AdminDashboard from "./pages/AdminDashboard";
 import InvoicePage from "./pages/InvoicePage";
+import Complaint from "./pages/Complaint";
 
 // Smart root redirect
 const RootRedirect = () => {
@@ -369,6 +370,18 @@ const App = () => {
           <UserGuard>
             <DashboardLayout>
               <InvoicePage />
+            </DashboardLayout>
+          </UserGuard>
+        }
+      />
+
+      {/* GRIEVANCES & WELFARE */}
+      <Route
+        path="/complaints"
+        element={
+          <UserGuard>
+            <DashboardLayout>
+              <Complaint />
             </DashboardLayout>
           </UserGuard>
         }

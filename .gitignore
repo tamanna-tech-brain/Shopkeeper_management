@@ -5,9 +5,14 @@ Backend/node_modules/
 
 # Environment files
 .env
-.env.local
+.env.*
+*.env
+*.env.example
 Backend/.env
+Backend/.env.example
 Frontend/.env
+Frontend/.env.example
+
 
 # Build outputs
 Frontend/dist/

@@ -6,18 +6,15 @@ import {getSearchMatch} from "../utils/search.js"
 export async function createSupplier(req, res){
     try{
         const { name , phone, address} = req.body;
-         console.log("body to create", {
-            name , phone, address
-        })
+        const image = req.file?.path || (req.file?.filename ? `/uploads/${req.file.filename}` : req.body.image || "");
         const supplierCreates = await supplierModel.create({
-            name , phone, address
+            name, phone, address, image
         });
-         console.log("after  create", supplierCreates)
         return res.status(201).json({
             success: true,
             data: supplierCreates,
-            message: " supplier created successfully"
-    });
+            message: "supplier created successfully"
+        });
     }
     catch (error) {
         console.error("error", error)
@@ -76,7 +73,11 @@ export async function getSupplierById(req, res) {
 export async function updateSupplierById(req, res){
     try{
         const { id } = req.params;
-        const supplierUpdated = await supplierModel.findByIdAndUpdate(id, req.body, {new: true});
+        const updateData = { ...req.body };
+        if (req.file) {
+            updateData.image = req.file.path || (req.file.filename ? `/uploads/${req.file.filename}` : undefined);
+        }
+        const supplierUpdated = await supplierModel.findByIdAndUpdate(id, updateData, {new: true});
         if (!supplierUpdated) {
             return res.status(404).json({
                 success: false,

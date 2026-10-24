@@ -13,7 +13,11 @@ const supplierSchema = new mongoose.Schema({
     address: {
         type: String,
         required : true
-        },
+    },
+    image: {
+        type: String,
+        default: ""
+    },
     },
     {
          timestamps: true,

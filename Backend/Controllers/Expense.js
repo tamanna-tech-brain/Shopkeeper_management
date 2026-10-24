@@ -3,15 +3,16 @@ import { getPagination } from "../utils/Pagination.js";
 import { getSearchMatch } from "../utils/search.js";
 export async function createExpense(req, res){
     try{
-        const { title, amount, category, date} = req.body;
+        const { title, amount, category, date } = req.body;
+        const receiptImage = req.file?.path || (req.file?.filename ? `/uploads/${req.file.filename}` : req.body.receiptImage || "");
         const expenseCreate = await expenseModel.create({
-            title, amount, category, date
+            title, amount, category, date, receiptImage
         });
         return res.status(200).json({
             success: true,
             data: expenseCreate,
-            message: " expense created successfully"
-    });
+            message: "expense created successfully"
+        });
     }
     catch (error) {
         return res.status(400).json({
@@ -78,7 +79,11 @@ export async function getExpensesById(req, res) {
 export async function updateExpensesById(req, res){
     try{
         const { id } = req.params;
-        const expenseUpdated = await expenseModel.findByIdAndUpdate(id, req.body, {new: true});
+        const updateData = { ...req.body };
+        if (req.file) {
+            updateData.receiptImage = req.file.path || (req.file.filename ? `/uploads/${req.file.filename}` : undefined);
+        }
+        const expenseUpdated = await expenseModel.findByIdAndUpdate(id, updateData, {new: true});
         if (!expenseUpdated) {
             return res.status(404).json({
                 success: false,

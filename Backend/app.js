@@ -3,6 +3,7 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import morgan from "morgan";
 
+import path from "path";
 import userRouter from "./Routers/User.js";
 import customerRouter from "./Routers/Customer.js";
 import supplierRouter from "./Routers/Supplier.js";
@@ -11,6 +12,7 @@ import expenseRouter from "./Routers/Expense.js";
 import productRouter from "./Routers/Product.js";
 import dashboardRouter from "./Routers/dashboardRoutes.js";
 import invoiceRouter from "./Routers/invoiceRoutes.js";
+import complaintRouter from "./Routers/Complaint.js";
 import helmet from "helmet";
 import mongoSanitize from "express-mongo-sanitize";
 import rateLimit from "express-rate-limit";
@@ -79,6 +81,8 @@ app.get("/api/health", (req, res) => {
     });
 });
 
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+
 app.use("/api/user", userRouter);
 app.use("/api/customer", customerRouter);
 app.use("/api/expense", expenseRouter);
@@ -87,5 +91,6 @@ app.use("/api/sales", salesRouter);
 app.use("/api/supplier", supplierRouter);
 app.use("/api/dashboard", dashboardRouter);
 app.use("/api/invoice", invoiceRouter);
+app.use("/api/complaint", complaintRouter);
 
 export default app;

@@ -152,8 +152,12 @@ const GetAllSupplier = () => {
               <div>
                 {/* Header: Avatar and Name */}
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-cyan-600 to-indigo-600 text-white font-extrabold text-base flex items-center justify-center shrink-0 shadow-md">
-                    {s.name ? s.name[0].toUpperCase() : "S"}
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-cyan-600 to-indigo-600 text-white font-extrabold text-base flex items-center justify-center shrink-0 shadow-md overflow-hidden">
+                    {s.image ? (
+                      <img src={s.image} alt={s.name} className="w-full h-full object-cover" />
+                    ) : (
+                      s.name ? s.name[0].toUpperCase() : "S"
+                    )}
                   </div>
                   <div className="overflow-hidden">
                     <h3 className="text-base font-bold text-white tracking-tight truncate">
@@ -249,6 +253,8 @@ const CreateSupplier = () => {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const nameRef = useRef();
@@ -256,6 +262,14 @@ const CreateSupplier = () => {
   useEffect(() => {
     nameRef.current?.focus();
   }, []);
+
+  const handleImageChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
 
   const handleSubmit = async (e) => {
     if (e) e.preventDefault();
@@ -283,11 +297,15 @@ const CreateSupplier = () => {
 
       setLoading(true);
 
-      await createSupplier({
-        name: name.trim(),
-        phone: cleanPhone,
-        address: address.trim(),
-      });
+      const formData = new FormData();
+      formData.append("name", name.trim());
+      formData.append("phone", cleanPhone);
+      formData.append("address", address.trim());
+      if (imageFile) {
+        formData.append("image", imageFile);
+      }
+
+      await createSupplier(formData);
 
       toast.success("Supplier registered successfully!");
       navigate("/supplier");
@@ -352,6 +370,23 @@ const CreateSupplier = () => {
             required
             className="w-full rounded-xl py-2.5 px-3.5 text-sm glass-input border border-slate-800 focus:border-indigo-500"
           />
+        </div>
+
+        <div className="text-left">
+          <label className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
+            Vendor Logo / Contract Image (Optional)
+          </label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleImageChange}
+            className="w-full text-xs text-slate-400 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500"
+          />
+          {imagePreview && (
+            <div className="mt-2.5 relative w-20 h-20 rounded-xl overflow-hidden border border-slate-700 shadow-md">
+              <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+            </div>
+          )}
         </div>
 
         <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
@@ -525,6 +560,8 @@ const UpdateSupplierById = () => {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -537,6 +574,9 @@ const UpdateSupplierById = () => {
         setName(data.name || "");
         setPhone(data.phone || "");
         setAddress(data.address || "");
+        if (data.image) {
+          setImagePreview(data.image);
+        }
       }
     } catch (error) {
       console.error(error);
@@ -549,6 +589,14 @@ const UpdateSupplierById = () => {
   useEffect(() => {
     fetchSupplier();
   }, [id]);
+
+  const handleImageChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
 
   const handleUpdate = async (e) => {
     if (e) e.preventDefault();
@@ -575,11 +623,15 @@ const UpdateSupplierById = () => {
       }
 
       setSaving(true);
-      await updateSupplierById(id, {
-        name: name.trim(),
-        phone: cleanPhone,
-        address: address.trim(),
-      });
+      const formData = new FormData();
+      formData.append("name", name.trim());
+      formData.append("phone", cleanPhone);
+      formData.append("address", address.trim());
+      if (imageFile) {
+        formData.append("image", imageFile);
+      }
+
+      await updateSupplierById(id, formData);
       toast.success("Supplier updated successfully");
       navigate(`/supplier/get/${id}`);
     } catch (error) {
@@ -642,6 +694,23 @@ const UpdateSupplierById = () => {
             required
             className="w-full rounded-xl py-2.5 px-3.5 text-sm glass-input border border-slate-800 focus:border-indigo-500"
           />
+        </div>
+
+        <div className="text-left">
+          <label className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
+            Vendor Logo / Contract Image
+          </label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleImageChange}
+            className="w-full text-xs text-slate-400 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500"
+          />
+          {imagePreview && (
+            <div className="mt-2.5 relative w-20 h-20 rounded-xl overflow-hidden border border-slate-700 shadow-md">
+              <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+            </div>
+          )}
         </div>
 
         <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
