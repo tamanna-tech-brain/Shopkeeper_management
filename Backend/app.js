@@ -21,11 +21,40 @@ const app = express();
 
 app.use(express.json());
 app.use(cookieParser());
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+  "http://localhost:3000",
+  "http://127.0.0.1:3000",
+];
+
 app.use(cors({
-  origin: "http://localhost:5173",
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin) || origin.startsWith("http://localhost:") || origin.startsWith("http://127.0.0.1:")) {
+      callback(null, true);
+    } else {
+      callback(null, true);
+    }
+  },
   credentials: true
 }));
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: false
+}));
+
+// Express 5 compatibility: make req.query writable for xss-clean
+app.use((req, res, next) => {
+  try {
+    const q = { ...req.query };
+    Object.defineProperty(req, "query", {
+      value: q,
+      writable: true,
+      enumerable: true,
+      configurable: true,
+    });
+  } catch (e) {}
+  next();
+});
 
 app.use(xss());
 
@@ -36,10 +65,19 @@ app.use(mongoSanitize());
 app.use(morgan("dev"));
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 100
+    max: 1000,
+    message: { success: false, message: "Too many requests, please try again later." }
 });
 
 app.use(limiter);
+
+app.get("/api/health", (req, res) => {
+    res.status(200).json({
+        status: "ok",
+        uptime: process.uptime(),
+        timestamp: new Date().toISOString()
+    });
+});
 
 app.use("/api/user", userRouter);
 app.use("/api/customer", customerRouter);

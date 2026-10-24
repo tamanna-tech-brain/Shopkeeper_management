@@ -59,7 +59,7 @@ export async function getProductById(req, res) {
         if(!productGetById) {
            return res.status(404).json({
             success: false,
-            message : "failed",
+            message: "Product not found",
             });
         }
         return res.json({
@@ -84,7 +84,7 @@ export async function updateProductById(req, res){
         if (!productUpdated) {
             return res.status(404).json({
                 success: false,
-                message: "failed"
+                message: "Product not found"
             });
         }
         return res.status(200).json({

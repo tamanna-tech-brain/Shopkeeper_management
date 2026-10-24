@@ -1,42 +1,63 @@
+import React, { useEffect } from "react";
+import { FaTimes } from "react-icons/fa";
+
 const Modal = ({
   isOpen,
   onClose,
+  title,
   children,
+  maxWidth = "max-w-lg",
 }) => {
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape" && isOpen) {
+        onClose();
+      }
+    };
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+      window.addEventListener("keydown", handleKeyDown);
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   return (
-    <div
-      className="
-        fixed inset-0
-        bg-black/50
-        flex items-center justify-center
-        z-50
-      "
-    >
+    <div className="fixed inset-0 z-50 overflow-y-auto">
+      {/* Backdrop */}
       <div
-        className="
-          bg-gray-900
-          p-6
-          rounded-2xl
-          w-full
-          max-w-md
-        "
-      >
-        {children}
+        className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm transition-opacity"
+        onClick={onClose}
+      />
 
-        <button
-          onClick={onClose}
-          className="
-            mt-4
-            bg-red-500
-            text-white
-            px-4 py-2
-            rounded-xl
-          "
+      {/* Modal Dialog */}
+      <div className="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+        <div
+          className={`relative transform overflow-hidden rounded-2xl bg-slate-900 border border-slate-800 text-left shadow-2xl transition-all sm:my-8 w-full ${maxWidth} glass-panel`}
+          onClick={(e) => e.stopPropagation()}
         >
-          Close
-        </button>
+          {/* Header */}
+          <div className="flex items-center justify-between border-b border-slate-800/80 px-6 py-4">
+            <h3 className="text-lg font-bold text-white tracking-tight">
+              {title}
+            </h3>
+            <button
+              onClick={onClose}
+              className="rounded-lg p-1 text-slate-400 hover:bg-slate-800 hover:text-white transition"
+            >
+              <FaTimes className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* Body */}
+          <div className="px-6 py-5 max-h-[75vh] overflow-y-auto">
+            {children}
+          </div>
+        </div>
       </div>
     </div>
   );

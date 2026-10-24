@@ -82,13 +82,13 @@ export async function updateExpensesById(req, res){
         if (!expenseUpdated) {
             return res.status(404).json({
                 success: false,
-                message: "failed"
+                message: "Expense not found"
             });
         }
         return res.status(200).json({
             success: true,
             data: expenseUpdated,
-            message: "expenses updated successfully"
+            message: "Expense updated successfully"
         });
     }
     catch (error) {
@@ -106,10 +106,10 @@ export async function deleteExpenseById(req, res) {
         if (!expenseDeleted) {
             return res.status(404).json({
             success: false,
-            message: "expense not found"
+            message: "Expense not found"
             });
         }
-        return res.status(201).json({
+        return res.status(200).json({
             success: true,
             data : expenseDeleted,
             message: "Deleted successfully"

@@ -30,8 +30,15 @@ export const createInvoice = async (req, res) => {
 export const getInvoiceById = async (req, res) => {
   try {
     const invoice = await Invoice.findById(req.params.id)
-      .populate("userId")
+      .populate("userId", "name email role")
       .populate("orderId");
+
+    if (!invoice) {
+      return res.status(404).json({
+        success: false,
+        message: "Invoice not found",
+      });
+    }
 
     res.status(200).json({
       success: true,

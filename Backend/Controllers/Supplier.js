@@ -58,13 +58,13 @@ export async function getSupplierById(req, res) {
         if(!supplierGetById) {
            return res.status(404).json({
             success: false,
-            message : "failed",
+            message: "Supplier not found",
             });
         }
         return res.json({
         success: true,
         data: supplierGetById,
-        message: "supplier found successfully"
+        message: "Supplier found successfully"
         });
     }catch (err) {
         res.status(500).json({
@@ -80,13 +80,13 @@ export async function updateSupplierById(req, res){
         if (!supplierUpdated) {
             return res.status(404).json({
                 success: false,
-                message: "failed"
+                message: "Supplier not found"
             });
         }
         return res.status(200).json({
             success: true,
             data: supplierUpdated,
-            message: "supplier updated successfully"
+            message: "Supplier updated successfully"
         });
     }
     catch (error) {
@@ -104,10 +104,10 @@ export async function deleteSupplierById(req, res) {
         if (!supplierDeleted) {
             return res.status(404).json({
             success: false,
-            message: "supplier not found"
+            message: "Supplier not found"
             });
         }
-        return res.status(201).json({
+        return res.status(200).json({
             success: true,
             data : supplierDeleted,
             message: "Deleted successfully"

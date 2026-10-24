@@ -36,7 +36,7 @@ export const saleUpdateSchema = joi.object({
     .string()
     .hex()
     .length(24)
-    .required(),
+    .optional(),
 
   items: joi.array().items(
     joi.object({
@@ -50,14 +50,14 @@ export const saleUpdateSchema = joi.object({
 
       price: joi.number().min(0).required(),
     })
-  ).min(1).required(),
+  ).min(1).optional(),
 
-  totalAmount: joi.number().min(0).required(),
+  totalAmount: joi.number().min(0).optional(),
 
   paymentMethod: joi
     .string()
     .valid("Cash", "UPI", "Card")
-    .required(),
+    .optional(),
 
   date: joi.date().optional(),
 });

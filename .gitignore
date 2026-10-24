@@ -1,8 +1,29 @@
-# Ignore node_modules (both frontend & backend)
+# Dependencies
 node_modules/
-frontend/node_modules/
-backend/node_modules/
+Frontend/node_modules/
+Backend/node_modules/
 
-# Ignore environment files
-Backend/.env
+# Environment files
 .env
+.env.local
+Backend/.env
+Frontend/.env
+
+# Build outputs
+Frontend/dist/
+dist/
+
+# Playwright & test artifacts
+.playwright-mcp/
+test_db.js
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS Files
+.DS_Store
+Thumbs.db
+

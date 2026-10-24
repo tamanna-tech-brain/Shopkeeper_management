@@ -16,7 +16,7 @@ export const loginUser = createAsyncThunk(
             return await loginAPI(data);
         }catch(error){
             return thunkAPI.rejectWithValue(
-                error.response?.data?.message
+                error.response?.data?.message || error.message || "Invalid email or password"
             );
         }
     }
@@ -29,7 +29,7 @@ export const registerUser = createAsyncThunk(
             return await registerAPI(data);
         }catch(error){
             return thunkAPI.rejectWithValue(
-                error.response?.data?.message
+                error.response?.data?.message || error.message || "Registration failed"
             );
         }
     }

@@ -12,7 +12,7 @@ const router = express.Router();
 router.post(
   "/",
   protect,
-  authorizeRoles("admin"),
+  authorizeRoles("admin", "staff"),
   createInvoice
 );
 

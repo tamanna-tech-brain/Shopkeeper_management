@@ -57,13 +57,13 @@ export async function getCustomerById(req, res) {
         if(!customerGetById) {
            return res.status(404).json({
             success: false,
-            message : "failed",
+            message: "Customer not found",
             });
         }
         return res.json({
         success: true,
         data: customerGetById,
-        message: "customer found successfully"
+        message: "Customer found successfully"
         });
     }catch (err) {
         return res.status(500).json({
@@ -79,13 +79,13 @@ export async function updateCustomerById(req, res){
         if (!customerUpdated) {
             return res.status(404).json({
                 success: false,
-                message: "failed"
+                message: "Customer not found"
             });
         }
         return res.status(200).json({
             success: true,
             data: customerUpdated,
-            message: "customer updated successfully"
+            message: "Customer updated successfully"
         });
     }
     catch (error) {
@@ -103,10 +103,10 @@ export async function deleteCustomerById(req, res) {
         if (!customerDeleted) {
             return res.status(404).json({
             success: false,
-            message: "customer not found"
+            message: "Customer not found"
         });
         }
-        res.status(201).json({
+        res.status(200).json({
         success: true,
         data : customerDeleted,
         message: "Deleted successfully"

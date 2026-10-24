@@ -1,31 +1,57 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-
+import { useNavigate, useParams, Link } from "react-router-dom";
+import toast from "react-hot-toast";
 import {
-    createExpense,
-    getExpenses,
-    getExpensesById,
-    updateExpensesById,
-    deleteExpenseById
+  createExpense,
+  getExpenses,
+  getExpensesById,
+  updateExpensesById,
+  deleteExpenseById,
 } from "../apis/api.js";
+import Button from "../components/common/Button";
+import Input from "../components/common/Input";
+import SearchBar from "../components/common/SearchBar";
+import Pagination from "../components/common/Pagination";
+import ConfirmDialog from "../components/common/ConfirmDialog";
+import EmptyState from "../components/common/EmptyState";
+import Loader from "../components/common/Loader";
+import StatusBadge from "../ui/StatusBadge";
+import {
+  FaReceipt,
+  FaPlus,
+  FaCalendarAlt,
+  FaTag,
+  FaEdit,
+  FaTrashAlt,
+  FaArrowLeft,
+  FaMoneyBillWave,
+  FaEye,
+  FaDownload,
+} from "react-icons/fa";
 
+// ======================== EXPENSE DASHBOARD ======================== //
 const ExpenseDashboard = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-gradient-to-tr from-gray-900 via-indigo-900 to-black p-10">
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+            Store Expense Tracker
+          </h1>
+          <p className="text-sm text-slate-400 mt-1">
+            Track utility bills, staff payroll, rent, and miscellaneous retail expenditures.
+          </p>
+        </div>
 
-      <div className="flex justify-between mb-10">
-        <h1 className="text-4xl text-white font-bold">
-          Expense Dashboard
-        </h1>
-
-        <button
+        <Button
+          variant="primary"
           onClick={() => navigate("/expense/create")}
-          className="bg-indigo-500 px-6 py-3 rounded-xl text-white"
+          icon={<FaPlus className="w-3.5 h-3.5" />}
         >
-          + Create Expense
-        </button>
+          Record Expense
+        </Button>
       </div>
 
       <GetAllExpense />
@@ -33,252 +59,558 @@ const ExpenseDashboard = () => {
   );
 };
 
-const CreateExpense = () => {
-
-  const navigate = useNavigate();
-
-  const [title, setTitle] = useState("");
-  const [amount, setAmount] = useState("");
-  const [category, setCategory] = useState("");
-  const [date, setDate] = useState("");
-
-  const handleCreate = async () => {
-    try {
-
-      await createExpense({
-        title,
-        amount,
-        category,
-        date
-      });
-
-      alert("Expense Created");
-      navigate("/expense");
-
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-black">
-
-      <div className="w-full max-w-md bg-white/10 p-8 rounded-3xl">
-
-        <input
-          placeholder="Title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          className="w-full p-3 mb-3 rounded-xl"
-        />
-
-        <input
-          type="number"
-          placeholder="Amount"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          className="w-full p-3 mb-3 rounded-xl"
-        />
-
-        <input
-          placeholder="Category"
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-          className="w-full p-3 mb-3 rounded-xl"
-        />
-
-        <input
-          type="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-          className="w-full p-3 mb-3 rounded-xl"
-        />
-
-        <button
-          onClick={handleCreate}
-          className="bg-indigo-500 w-full p-3 rounded-xl text-white"
-        >
-          Create
-        </button>
-
-      </div>
-    </div>
-  );
-};
-
+// ======================== GET ALL EXPENSES ======================== //
 const GetAllExpense = () => {
   const navigate = useNavigate();
 
   const [expenses, setExpenses] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
+  const [pagination, setPagination] = useState({});
   const [search, setSearch] = useState("");
-  const [totalPages, setTotalPages] = useState(1);
+  const [deleteId, setDeleteId] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+
+  const limit = 8;
+
+  const fetchExpenses = async () => {
+    try {
+      setLoading(true);
+      const res = await getExpenses(page, limit, search);
+      const fetched = Array.isArray(res.data.data) ? res.data.data : [];
+      setExpenses(fetched);
+      setPagination(res.data.pagination || {});
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to load expenses");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchExpenses = async () => {
-      try {
-        const res = await getExpenses(page, 2, search);
-        console.log("API RESPONSE:", res.data);
-        setExpenses(res.data.data || []);
-        setTotalPages(res.data.pagination || 1); // IMPORTANT FIX
-      } catch (error) {
-        console.log(error);
-      }
-    };
-
     fetchExpenses();
   }, [page, search]);
 
+  const handleDeleteConfirm = async () => {
+    if (!deleteId) return;
+    try {
+      setDeleting(true);
+      await deleteExpenseById(deleteId);
+      toast.success("Expense record removed");
+      setDeleteId(null);
+      fetchExpenses();
+    } catch (error) {
+      console.error(error);
+      toast.error(error.response?.data?.message || "Failed to delete expense");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const totalSum = expenses.reduce(
+    (acc, curr) => acc + Number(curr.amount || 0),
+    0
+  );
+
+  const getCategoryBadge = (cat) => {
+    switch (cat?.toLowerCase()) {
+      case "rent":
+        return <StatusBadge status={cat} variant="purple" />;
+      case "salary":
+      case "salaries":
+        return <StatusBadge status={cat} variant="info" />;
+      case "electricity":
+      case "utilities":
+        return <StatusBadge status={cat} variant="warning" />;
+      case "supplies":
+      case "inventory":
+        return <StatusBadge status={cat} variant="primary" />;
+      default:
+        return <StatusBadge status={cat || "General"} variant="default" />;
+    }
+  };
+
+  const handleExportCSV = () => {
+    if (!expenses || !expenses.length) {
+      toast.error("No expense records to export");
+      return;
+    }
+    const headers = ["Date", "Title", "Category", "Amount (INR)", "Description"];
+    const rows = expenses.map((e) => [
+      e.date ? new Date(e.date).toLocaleDateString("en-IN") : "N/A",
+      e.title || "Expense",
+      e.category || "General",
+      e.amount || 0,
+      e.description || "",
+    ]);
+    const csvContent = [
+      headers.map((h) => `"${h}"`).join(","),
+      ...rows.map((r) =>
+        r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(",")
+      ),
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute(
+      "download",
+      `expenses_report_${new Date().toISOString().split("T")[0]}.csv`
+    );
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success(`Exported ${expenses.length} expenses to CSV!`);
+  };
+
   return (
-    <div>
+    <div className="space-y-6">
+      {/* Mini Summary & Search Bar */}
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+        <div className="sm:col-span-2 p-4 rounded-2xl glass-card border border-slate-800 bg-slate-900/60 flex items-center">
+          <SearchBar
+            value={search}
+            onChange={(val) => {
+              setSearch(val);
+              setPage(1);
+            }}
+            placeholder="Search by title, category, or note..."
+            className="w-full"
+          />
+        </div>
 
-      <div className="flex justify-center mb-10">
-        <input
-          placeholder="Search Expense..."
-          value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            setPage(1);
-          }}
-          className="w-full max-w-md p-4 rounded-2xl outline-none
-          bg-white/10 text-white placeholder:text-gray-300
-          border border-white/20 backdrop-blur-xl"
-        />
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 place-items-center">
-
-        {expenses.map((e) => (
-          <div
-            key={e._id}
-            onClick={() => navigate(`/expense/get/${e._id}`)}
-            className="bg-gradient-to-br from-indigo-900/40 via-purple-900/40 to-pink-900/40
-            backdrop-blur-xl border border-white/20
-            rounded-2xl shadow-xl w-64 h-64
-            flex flex-col items-center justify-center
-            cursor-pointer hover:scale-105 transition-all duration-300"
-          >
-            <h2 className="text-2xl font-bold text-white text-center mb-2">
-              {e.title}
-            </h2>
-
-            <p className="text-pink-300 text-lg font-semibold">
-              ₹ {e.amount}
-            </p>
-
-            <p className="text-gray-300 mt-2">
-              {e.category}
+        <div className="p-4 rounded-2xl glass-card border border-slate-800 bg-slate-900/60 flex items-center justify-between">
+          <div>
+            <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider">
+              Page Total
+            </span>
+            <p className="text-2xl font-extrabold text-rose-400 mt-0.5">
+              ₹{totalSum.toLocaleString("en-IN")}
             </p>
           </div>
-        ))}
+          <div className="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-400 flex items-center justify-center">
+            <FaReceipt className="w-5 h-5" />
+          </div>
+        </div>
 
+        <div className="p-4 rounded-2xl glass-card border border-slate-800 bg-slate-900/60 flex items-center justify-center">
+          <Button
+            variant="outline"
+            onClick={handleExportCSV}
+            icon={<FaDownload className="w-3.5 h-3.5" />}
+            className="w-full text-xs"
+          >
+            Export CSV
+          </Button>
+        </div>
       </div>
 
-      <div className="flex justify-center gap-6 mt-10">
+      {loading ? (
+        <Loader text="Loading expense ledger..." />
+      ) : expenses.length === 0 ? (
+        <EmptyState
+          icon={<FaReceipt className="w-8 h-8 opacity-80" />}
+          title="No Expenses Logged"
+          description={
+            search
+              ? "No expenses matched your search."
+              : "No expenditures have been recorded yet. Track your first expense."
+          }
+          actionText={search ? "Clear Search" : "+ Record Expense"}
+          onAction={() => {
+            if (search) setSearch("");
+            else navigate("/expense/create");
+          }}
+        />
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+          {expenses.map((exp) => (
+            <div
+              key={exp._id}
+              className="glass-card rounded-2xl p-5 border border-slate-800 bg-slate-900/60 shadow-xl flex flex-col justify-between transition-all duration-300 hover:border-indigo-500/30"
+            >
+              <div>
+                <div className="flex items-center justify-between pb-3 border-b border-slate-800/60">
+                  <span className="text-xl font-extrabold text-rose-400">
+                    ₹{Number(exp.amount || 0).toLocaleString("en-IN")}
+                  </span>
+                  {getCategoryBadge(exp.category)}
+                </div>
 
-        <button
-          onClick={() => setPage(page - 1)}
-          disabled={page === 1}
-          className="bg-gray-700 hover:bg-gray-600 disabled:opacity-50 text-white px-6 py-3 rounded-xl"
-        >
-          Prev
-        </button>
+                <div className="mt-3 space-y-2">
+                  <h3 className="text-base font-bold text-white tracking-tight line-clamp-1">
+                    {exp.title}
+                  </h3>
 
-        <button
-          onClick={() => setPage(page + 1)}
-          disabled={page === totalPages}
-          className="bg-indigo-500 hover:bg-indigo-600 disabled:opacity-50 text-white px-6 py-3 rounded-xl"
-        >
-          Next
-        </button>
+                  <div className="flex items-center gap-1.5 text-xs text-slate-400">
+                    <FaCalendarAlt className="w-3 h-3 text-slate-400" />
+                    <span>
+                      {exp.date
+                        ? new Date(exp.date).toLocaleDateString("en-IN", {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                          })
+                        : "Today"}
+                    </span>
+                  </div>
+                </div>
+              </div>
 
-      </div>
+              <div className="pt-4 mt-4 border-t border-slate-800/60 flex items-center justify-between gap-2">
+                <Link
+                  to={`/expense/get/${exp._id}`}
+                  className="flex-1 py-1.5 px-3 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-center text-slate-200 transition"
+                >
+                  Details
+                </Link>
+                <Link
+                  to={`/expense/update/${exp._id}`}
+                  className="p-1.5 rounded-lg text-indigo-400 hover:bg-indigo-500/10 transition"
+                  title="Edit Expense"
+                >
+                  <FaEdit className="w-3.5 h-3.5" />
+                </Link>
+                <button
+                  onClick={() => setDeleteId(exp._id)}
+                  className="p-1.5 rounded-lg text-rose-400 hover:bg-rose-500/10 transition"
+                  title="Delete Expense"
+                >
+                  <FaTrashAlt className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
+      {/* Pagination */}
+      <Pagination
+        currentPage={page}
+        totalPages={pagination.totalPages || 1}
+        onPageChange={(p) => setPage(p)}
+        totalItems={pagination.total}
+      />
+
+      {/* Delete Dialog */}
+      <ConfirmDialog
+        isOpen={Boolean(deleteId)}
+        onClose={() => setDeleteId(null)}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Expense Entry"
+        message="Are you sure you want to remove this expense record from the ledger?"
+        confirmText="Yes, Delete"
+        loading={deleting}
+      />
     </div>
   );
 };
 
+// ======================== CREATE EXPENSE ======================== //
+const CreateExpense = () => {
+  const navigate = useNavigate();
+
+  const [title, setTitle] = useState("");
+  const [amount, setAmount] = useState("");
+  const [category, setCategory] = useState("Utilities");
+  const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+  const [loading, setLoading] = useState(false);
+
+  const titleRef = useRef();
+
+  useEffect(() => {
+    titleRef.current?.focus();
+  }, []);
+
+  const categories = [
+    "Rent",
+    "Utilities",
+    "Salaries",
+    "Inventory & Stock",
+    "Maintenance",
+    "Marketing",
+    "Transportation",
+    "Packaging",
+    "Other",
+  ];
+
+  const handleCreate = async (e) => {
+    if (e) e.preventDefault();
+    try {
+      if (!title || amount === "" || !category) {
+        return toast.error("Please fill all required fields");
+      }
+
+      if (title.trim().length < 4 || title.trim().length > 60) {
+        return toast.error("Expense title must be between 4 and 60 characters");
+      }
+
+      if (Number(amount) < 0) {
+        return toast.error("Amount must be greater than or equal to 0");
+      }
+
+      if (category.trim().length < 3 || category.trim().length > 60) {
+        return toast.error("Category must be between 3 and 60 characters");
+      }
+
+      setLoading(true);
+
+      await createExpense({
+        title: title.trim(),
+        amount: Number(amount),
+        category: category.trim(),
+        date: date || new Date().toISOString(),
+      });
+
+      toast.success("Expense logged successfully!");
+      navigate("/expense");
+    } catch (error) {
+      console.error(error);
+      toast.error(error.message || error.response?.data?.message || "Failed to create expense");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="max-w-2xl mx-auto space-y-6">
+      <div className="flex items-center gap-3 pb-2 border-b border-slate-800">
+        <button
+          onClick={() => navigate("/expense")}
+          className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-900 border border-slate-800 transition"
+        >
+          <FaArrowLeft className="w-3.5 h-3.5" />
+        </button>
+        <div>
+          <h1 className="text-2xl font-bold text-white tracking-tight">
+            Record New Store Expense
+          </h1>
+          <p className="text-xs text-slate-400">
+            Log financial outlays for accurate profit and loss tracking.
+          </p>
+        </div>
+      </div>
+
+      <form
+        onSubmit={handleCreate}
+        className="glass-card rounded-2xl p-6 sm:p-8 border border-slate-800 bg-slate-900/60 shadow-xl space-y-5"
+      >
+        <Input
+          ref={titleRef}
+          label="Expense Title / Description"
+          placeholder="e.g. Electricity Bill October, Store Cleaning Supplies"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          required
+        />
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Input
+            label="Amount (₹)"
+            type="number"
+            placeholder="e.g. 2400"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            required
+            min="0"
+          />
+
+          <div className="text-left">
+            <label className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
+              Category <span className="text-rose-400">*</span>
+            </label>
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="w-full rounded-xl py-2.5 px-3.5 text-sm glass-input border border-slate-800 text-slate-200 bg-slate-900"
+            >
+              {categories.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <Input
+          label="Expense Date"
+          type="date"
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+          required
+        />
+
+        <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
+          <Button
+            variant="outline"
+            onClick={() => navigate("/expense")}
+            disabled={loading}
+          >
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            variant="primary"
+            loading={loading}
+            icon={<FaPlus className="w-3 h-3" />}
+          >
+            Save Expense
+          </Button>
+        </div>
+      </form>
+    </div>
+  );
+};
+
+// ======================== GET EXPENSES BY ID ======================== //
 const GetExpensesById = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+
   const [expense, setExpense] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [showDelete, setShowDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  const fetchExpense = async () => {
+    try {
+      setLoading(true);
+      const res = await getExpensesById(id);
+      setExpense(res.data.data);
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to load expense");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchExpense = async () => {
-      try {
-        const res = await getExpensesById(id);
-        setExpense(res.data.data);
-      } catch (error) {
-        console.log("GET BY ID ERROR:", error);
-      }
-    };
-
     fetchExpense();
   }, [id]);
 
   const handleDelete = async () => {
     try {
+      setDeleting(true);
       await deleteExpenseById(id);
-      alert("Expense deleted successfully");
+      toast.success("Expense removed");
       navigate("/expense");
     } catch (error) {
-      console.log(error);
-      alert(error.message);
+      console.error(error);
+      toast.error("Failed to delete expense");
+    } finally {
+      setDeleting(false);
     }
   };
 
+  if (loading) {
+    return <Loader text="Loading expense record..." />;
+  }
+
   if (!expense) {
-    return <div className="text-white p-10">Loading...</div>;
+    return (
+      <EmptyState
+        title="Expense Not Found"
+        description="This expense entry does not exist or has been removed."
+        actionText="Back to Expenses"
+        onAction={() => navigate("/expense")}
+      />
+    );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-tr from-gray-900 via-indigo-900 to-black">
-
-      <div className="w-[380px] bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl p-8 text-center">
-
-        <h1 className="text-3xl font-bold text-white mb-4">
-          {expense.title}
-        </h1>
-
-        <p className="text-pink-300 text-xl font-semibold mb-2">
-          ₹ {expense.amount}
-        </p>
-
-        <p className="text-gray-300 mb-2">
-          {expense.category}
-        </p>
-
-        <p className="text-gray-400 text-sm mb-6">
-          {new Date(expense.date).toLocaleDateString()}
-        </p>
-
-        {/* BUTTONS */}
-        <div className="flex flex-col gap-3">
-
+    <div className="max-w-2xl mx-auto space-y-6">
+      <div className="flex items-center justify-between pb-2 border-b border-slate-800">
+        <div className="flex items-center gap-3">
           <button
-            onClick={() => navigate(`/expense/update/${expense._id}`)}
-            className="bg-indigo-500 hover:bg-indigo-600 text-white py-2 rounded-xl transition"
+            onClick={() => navigate("/expense")}
+            className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-900 border border-slate-800 transition"
           >
-            Update Expense
+            <FaArrowLeft className="w-3.5 h-3.5" />
           </button>
-
-          <button
-            onClick={handleDelete}
-            className="bg-red-500 hover:bg-red-600 text-white py-2 rounded-xl transition"
-          >
-            Delete Expense
-          </button>
-
+          <div>
+            <h1 className="text-2xl font-bold text-white tracking-tight">
+              Expense Record
+            </h1>
+            <p className="text-xs text-slate-400 font-mono">ID: {expense._id}</p>
+          </div>
         </div>
 
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            onClick={() => navigate(`/expense/update/${expense._id}`)}
+            icon={<FaEdit className="w-3.5 h-3.5" />}
+          >
+            Edit
+          </Button>
+          <Button
+            variant="danger"
+            onClick={() => setShowDelete(true)}
+            icon={<FaTrashAlt className="w-3.5 h-3.5" />}
+          >
+            Delete
+          </Button>
+        </div>
       </div>
 
+      <div className="glass-card rounded-2xl p-6 sm:p-8 border border-slate-800 bg-slate-900/60 shadow-xl space-y-6">
+        <div className="flex items-center justify-between pb-6 border-b border-slate-800">
+          <div>
+            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              Amount Spent
+            </span>
+            <h2 className="text-4xl font-extrabold text-rose-400 mt-1">
+              ₹{Number(expense.amount || 0).toLocaleString("en-IN")}
+            </h2>
+          </div>
+          <span className="px-3 py-1 text-xs font-bold rounded-full bg-slate-800 text-slate-200 border border-slate-700">
+            {expense.category || "General"}
+          </span>
+        </div>
+
+        <div className="space-y-4 text-sm">
+          <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800">
+            <p className="text-xs text-slate-400">Description / Title</p>
+            <p className="text-base font-bold text-white mt-1">
+              {expense.title}
+            </p>
+          </div>
+
+          <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800 flex items-center justify-between">
+            <span className="text-xs text-slate-400">Date Logged</span>
+            <span className="text-sm font-semibold text-slate-200">
+              {new Date(expense.date || expense.createdAt).toLocaleDateString(
+                "en-IN",
+                {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                }
+              )}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <ConfirmDialog
+        isOpen={showDelete}
+        onClose={() => setShowDelete(false)}
+        onConfirm={handleDelete}
+        title="Delete Expense"
+        message={`Are you sure you want to remove the expense "${expense.title}"?`}
+        confirmText="Yes, Delete"
+        loading={deleting}
+      />
     </div>
   );
 };
 
+// ======================== UPDATE EXPENSE ======================== //
 const UpdateExpenseById = () => {
-
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -286,192 +618,266 @@ const UpdateExpenseById = () => {
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState("");
   const [date, setDate] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  const fetchExpense = async () => {
+    try {
+      setLoading(true);
+      const res = await getExpensesById(id);
+      const exp = res.data.data;
+      if (exp) {
+        setTitle(exp.title || "");
+        setAmount(String(exp.amount || ""));
+        setCategory(exp.category || "");
+        if (exp.date) {
+          setDate(new Date(exp.date).toISOString().split("T")[0]);
+        }
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to load expense");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     fetchExpense();
   }, [id]);
 
-  const fetchExpense = async () => {
-    try {
-      const res = await getExpensesById(id);
-      const e = res.data.data;
+  const categories = [
+    "Rent",
+    "Utilities",
+    "Salaries",
+    "Inventory & Stock",
+    "Maintenance",
+    "Marketing",
+    "Transportation",
+    "Packaging",
+    "Other",
+  ];
 
-      setTitle(e.title);
-      setAmount(e.amount);
-      setCategory(e.category);
-      setDate(e.date?.split("T")[0]);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const handleUpdate = async () => {
+  const handleUpdate = async (e) => {
+    if (e) e.preventDefault();
     try {
+      if (!title || amount === "" || !category) {
+        return toast.error("Please fill all required fields");
+      }
+
+      if (title.trim().length < 4 || title.trim().length > 60) {
+        return toast.error("Expense title must be between 4 and 60 characters");
+      }
+
+      if (Number(amount) < 0) {
+        return toast.error("Amount must be greater than or equal to 0");
+      }
+
+      if (category.trim().length < 3 || category.trim().length > 60) {
+        return toast.error("Category must be between 3 and 60 characters");
+      }
+
+      setSaving(true);
       await updateExpensesById(id, {
-        title,
-        amount,
-        category,
-        date
+        title: title.trim(),
+        amount: Number(amount),
+        category: category.trim(),
+        date: date || new Date().toISOString(),
       });
-
-      alert("Expense Updated Successfully");
-      navigate("/expense");
+      toast.success("Expense updated successfully");
+      navigate(`/expense/get/${id}`);
     } catch (error) {
-      console.log(error);
-      alert(error.message);
+      console.error(error);
+      toast.error(error.message || error.response?.data?.message || "Failed to update expense");
+    } finally {
+      setSaving(false);
     }
   };
+
+  if (loading) {
+    return <Loader text="Loading expense record..." />;
+  }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-tr from-gray-900 via-indigo-900 to-black">
+    <div className="max-w-2xl mx-auto space-y-6">
+      <div className="flex items-center gap-3 pb-2 border-b border-slate-800">
+        <button
+          onClick={() => navigate(`/expense/get/${id}`)}
+          className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-900 border border-slate-800 transition"
+        >
+          <FaArrowLeft className="w-3.5 h-3.5" />
+        </button>
+        <div>
+          <h1 className="text-2xl font-bold text-white tracking-tight">
+            Update Expense Entry
+          </h1>
+          <p className="text-xs text-slate-400 font-mono">ID: {id}</p>
+        </div>
+      </div>
 
-      <div className="w-full max-w-md p-8 rounded-3xl bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl">
-
-        <h1 className="text-3xl font-bold text-white text-center mb-8">
-          Update Expense
-        </h1>
-
-        <input
-          placeholder="Title"
+      <form
+        onSubmit={handleUpdate}
+        className="glass-card rounded-2xl p-6 sm:p-8 border border-slate-800 bg-slate-900/60 shadow-xl space-y-5"
+      >
+        <Input
+          label="Title / Description"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className="w-full mb-4 p-3 rounded-xl outline-none
-          bg-white/10 text-white placeholder:text-gray-300
-          border border-white/20"
+          required
         />
 
-        <input
-          type="number"
-          placeholder="Amount"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          className="w-full mb-4 p-3 rounded-xl outline-none
-          bg-white/10 text-white placeholder:text-gray-300
-          border border-white/20"
-        />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Input
+            label="Amount (₹)"
+            type="number"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            required
+            min="0"
+          />
 
-        <input
-          placeholder="Category"
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-          className="w-full mb-4 p-3 rounded-xl outline-none
-          bg-white/10 text-white placeholder:text-gray-300
-          border border-white/20"
-        />
+          <div className="text-left">
+            <label className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
+              Category
+            </label>
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="w-full rounded-xl py-2.5 px-3.5 text-sm glass-input border border-slate-800 text-slate-200 bg-slate-900"
+            >
+              {categories.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
 
-        <input
+        <Input
+          label="Date"
           type="date"
           value={date}
           onChange={(e) => setDate(e.target.value)}
-          className="w-full mb-6 p-3 rounded-xl outline-none
-          bg-white/10 text-white border border-white/20"
+          required
         />
 
-        <button
-          onClick={handleUpdate}
-          className="bg-indigo-500 hover:bg-indigo-600 text-white w-full p-3 rounded-xl transition"
-        >
-          Update Expense
-        </button>
-
-      </div>
-
+        <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
+          <Button
+            variant="outline"
+            onClick={() => navigate(`/expense/get/${id}`)}
+            disabled={saving}
+          >
+            Cancel
+          </Button>
+          <Button type="submit" variant="primary" loading={saving}>
+            Save Changes
+          </Button>
+        </div>
+      </form>
     </div>
   );
 };
 
+// ======================== DELETE EXPENSE (Fallback Route) ======================== //
 const DeleteExpenseById = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
 
-    const { id } = useParams();
-    const navigate = useNavigate();
+  const [expense, setExpense] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [deleting, setDeleting] = useState(false);
 
-    const [expense, setExpense] = useState(null);
-
-    useEffect(() => {
-        fetchExpense();
-    }, [id]);
-
-    const fetchExpense = async () => {
-        try {
-            const res = await getExpensesById(id);
-            setExpense(res.data.data);
-        } catch (error) {
-            console.log(error);
-        }
-    };
-
-    const handleDelete = async () => {
-        try {
-            await deleteExpenseById(id);
-
-            alert("Expense deleted successfully");
-
-            navigate("/expense");
-
-        } catch (error) {
-            console.log(error);
-
-            alert(error.message);
-        }
-    };
-
-    if (!expense) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-black text-white text-3xl">
-                Loading...
-            </div>
-        );
+  const fetchExpense = async () => {
+    try {
+      setLoading(true);
+      const res = await getExpensesById(id);
+      setExpense(res.data.data);
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to load expense");
+    } finally {
+      setLoading(false);
     }
+  };
 
+  useEffect(() => {
+    fetchExpense();
+  }, [id]);
+
+  const handleDelete = async () => {
+    try {
+      setDeleting(true);
+      await deleteExpenseById(id);
+      toast.success("Expense record deleted");
+      navigate("/expense");
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to delete expense");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  if (loading) {
+    return <Loader text="Loading expense record..." />;
+  }
+
+  if (!expense) {
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-tr from-slate-900 via-red-900 to-black">
-
-            <div className="w-full max-w-md p-8 rounded-3xl bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl text-white">
-
-                <h1 className="text-3xl font-bold text-center mb-6">
-                    Delete Expense
-                </h1>
-
-                <div className="text-center mb-8">
-
-                    <h2 className="text-2xl font-bold mb-3 text-pink-300">
-                        {expense.title}
-                    </h2>
-
-                    <p className="mb-2">
-                        ₹ {expense.amount}
-                    </p>
-
-                    <p className="mb-2">
-                        {expense.category}
-                    </p>
-
-                    <p className="text-sm text-gray-300">
-                        {new Date(expense.date).toLocaleDateString()}
-                    </p>
-
-                </div>
-
-                <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      navigate(`/expense/delete/${e._id}`);
-                    }}
-                      className="bg-red-500 px-3 py-2 rounded-lg text-white"
-                >
-  Delete
-</button>
-
-            </div>
-        </div>
+      <EmptyState
+        title="Expense Not Found"
+        description="This expense record does not exist or has been removed."
+        actionText="Back to Expenses"
+        onAction={() => navigate("/expense")}
+      />
     );
+  }
+
+  return (
+    <div className="max-w-md mx-auto pt-10">
+      <div className="glass-card rounded-2xl p-6 sm:p-8 border border-rose-500/30 bg-slate-900/80 shadow-2xl text-center space-y-6">
+        <div className="w-16 h-16 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center mx-auto">
+          <FaTrashAlt className="w-7 h-7" />
+        </div>
+
+        <div>
+          <h2 className="text-xl font-bold text-white tracking-tight">
+            Delete "{expense.title}"?
+          </h2>
+          <p className="text-xs text-slate-400 mt-2">
+            Are you sure you want to remove this expense of ₹{expense.amount}?
+          </p>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <Button
+            variant="outline"
+            className="flex-1"
+            onClick={() => navigate("/expense")}
+            disabled={deleting}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="danger"
+            className="flex-1"
+            onClick={handleDelete}
+            loading={deleting}
+          >
+            Delete Expense
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export {
-    ExpenseDashboard,
-    CreateExpense,
-    GetAllExpense,
-    GetExpensesById,
-    UpdateExpenseById,
-    DeleteExpenseById
-}
+  ExpenseDashboard,
+  CreateExpense,
+  GetAllExpense,
+  GetExpensesById,
+  UpdateExpenseById,
+  DeleteExpenseById,
+};

@@ -7,12 +7,22 @@ import express from "express";
 
 const server = http.createServer(app);
 
+const PORT = process.env.PORT || 3000;
+
 const startServer = async () => {
     await connectDB();
 
-    server.listen(3000, ()=> {
-       console.log(" Server running on port 3000");
-     
+    server.on("error", (err) => {
+        if (err.code === "EADDRINUSE") {
+            console.error(`❌ Port ${PORT} is already in use by another process. Run: Stop-Process -Id (Get-NetTCPConnection -LocalPort ${PORT}).OwningProcess -Force`);
+            process.exit(1);
+        } else {
+            console.error("Server error:", err.message);
+        }
+    });
+
+    server.listen(PORT, ()=> {
+       console.log(`🚀 Server running on port ${PORT}`);
     });
 };
 const io = new Server(server, {
@@ -20,6 +30,8 @@ const io = new Server(server, {
     origin: "*",
   },
 });
+
+app.set("io", io);
 
 io.on("connection", (socket) => {
   console.log("User connected:", socket.id);

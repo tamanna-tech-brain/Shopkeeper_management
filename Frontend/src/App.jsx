@@ -1,12 +1,12 @@
 import React from "react";
-import { Routes, Route } from "react-router-dom";
-import Navbar from "./components/Navbar";
+import { Routes, Route, Navigate } from "react-router-dom";
 
+import DashboardLayout from "./layout/DashboardLayout";
 import UserGuard from "./components/UserGuard";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import AdminRoute from "./routes/AdminRoute";
 
-import { Login, Register, UpdateUser } from "./pages/User";
+import { Login, Register, UpdateUser, UserProfile } from "./pages/User";
 
 import {
   SupplierDashboard,
@@ -51,285 +51,332 @@ import {
 import AdminDashboard from "./pages/AdminDashboard";
 import InvoicePage from "./pages/InvoicePage";
 
+// Smart root redirect
+const RootRedirect = () => {
+  const token = localStorage.getItem("token");
+  if (token) {
+    return <Navigate to="/admin" replace />;
+  }
+  return <Navigate to="/login" replace />;
+};
+
 const App = () => {
   return (
-    <>
-      <Navbar />
+    <Routes>
+      {/* ROOT & AUTH */}
+      <Route path="/" element={<RootRedirect />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
 
-      <Routes>
-        {/* AUTH */}
-        <Route path="/" element={<Login />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-
-        <Route
-          path="/updateUser/:id"
-          element={
-            <UserGuard>
-              <UpdateUser />
-            </UserGuard>
-          }
-        />
-
-        {/* ADMIN */}
-        <Route
-          path="/admin"
-          element={
-            <AdminRoute>
+      {/* ADMIN OVERVIEW */}
+      <Route
+        path="/admin"
+        element={
+          <AdminRoute>
+            <DashboardLayout>
               <AdminDashboard />
-            </AdminRoute>
-          }
-        />
+            </DashboardLayout>
+          </AdminRoute>
+        }
+      />
 
-        {/* SUPPLIER */}
-        <Route
-          path="/supplier"
-          element={
-            <ProtectedRoute>
+      {/* USER PROFILE & SETTINGS */}
+      <Route
+        path="/user"
+        element={
+          <UserGuard>
+            <DashboardLayout>
+              <UserProfile />
+            </DashboardLayout>
+          </UserGuard>
+        }
+      />
+      <Route
+        path="/updateUser/:id"
+        element={
+          <UserGuard>
+            <DashboardLayout>
+              <UpdateUser />
+            </DashboardLayout>
+          </UserGuard>
+        }
+      />
+
+      {/* SUPPLIER */}
+      <Route
+        path="/supplier"
+        element={
+          <ProtectedRoute>
+            <DashboardLayout>
               <SupplierDashboard />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/supplier/create"
-          element={
-            <UserGuard>
+            </DashboardLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/supplier/create"
+        element={
+          <UserGuard>
+            <DashboardLayout>
               <CreateSupplier />
-            </UserGuard>
-          }
-        />
-
-        <Route
-          path="/supplier/get/:id"
-          element={
-            <UserGuard>
+            </DashboardLayout>
+          </UserGuard>
+        }
+      />
+      <Route
+        path="/supplier/get/:id"
+        element={
+          <UserGuard>
+            <DashboardLayout>
               <GetSupplierById />
-            </UserGuard>
-          }
-        />
-
-        <Route
-          path="/supplier/update/:id"
-          element={
-            <UserGuard>
+            </DashboardLayout>
+          </UserGuard>
+        }
+      />
+      <Route
+        path="/supplier/update/:id"
+        element={
+          <UserGuard>
+            <DashboardLayout>
               <UpdateSupplierById />
-            </UserGuard>
-          }
-        />
-
-        <Route
-          path="/supplier/delete/:id"
-          element={
-            <UserGuard>
+            </DashboardLayout>
+          </UserGuard>
+        }
+      />
+      <Route
+        path="/supplier/delete/:id"
+        element={
+          <UserGuard>
+            <DashboardLayout>
               <DeleteSupplierById />
-            </UserGuard>
-          }
-        />
+            </DashboardLayout>
+          </UserGuard>
+        }
+      />
 
-        {/* PRODUCT */}
-        <Route
-          path="/product"
-          element={
-            <UserGuard>
+      {/* PRODUCT / INVENTORY */}
+      <Route
+        path="/product"
+        element={
+          <UserGuard>
+            <DashboardLayout>
               <ProductDashboard />
-            </UserGuard>
-          }
-        />
-
-        <Route
-          path="/product/create"
-          element={
-            <UserGuard>
+            </DashboardLayout>
+          </UserGuard>
+        }
+      />
+      <Route
+        path="/product/create"
+        element={
+          <UserGuard>
+            <DashboardLayout>
               <CreateProduct />
-            </UserGuard>
-          }
-        />
-
-        <Route
-          path="/product/get/:id"
-          element={
-            <UserGuard>
+            </DashboardLayout>
+          </UserGuard>
+        }
+      />
+      <Route
+        path="/product/get/:id"
+        element={
+          <UserGuard>
+            <DashboardLayout>
               <GetProductById />
-            </UserGuard>
-          }
-        />
-
-        <Route
-          path="/product/update/:id"
-          element={
-            <UserGuard>
+            </DashboardLayout>
+          </UserGuard>
+        }
+      />
+      <Route
+        path="/product/update/:id"
+        element={
+          <UserGuard>
+            <DashboardLayout>
               <UpdateProductById />
-            </UserGuard>
-          }
-        />
+            </DashboardLayout>
+          </UserGuard>
+        }
+      />
+      <Route
+        path="/product/delete/:id"
+        element={
+          <UserGuard>
+            <DashboardLayout>
+              <DeleteProductById />
+            </DashboardLayout>
+          </UserGuard>
+        }
+      />
 
-        <Route
-          path="/product/delete/:id"
-          element={<DeleteProductById />}
-        />
-
-        {/* CUSTOMER */}
-        <Route
-          path="/customer"
-          element={
-            <UserGuard>
+      {/* CUSTOMER */}
+      <Route
+        path="/customer"
+        element={
+          <UserGuard>
+            <DashboardLayout>
               <CustomerDashboard />
-            </UserGuard>
-          }
-        />
-
-        <Route
-          path="/customer/create"
-          element={
-            <UserGuard>
+            </DashboardLayout>
+          </UserGuard>
+        }
+      />
+      <Route
+        path="/customer/create"
+        element={
+          <UserGuard>
+            <DashboardLayout>
               <CreateCustomer />
-            </UserGuard>
-          }
-        />
-
-        <Route
-          path="/customer/get/:id"
-          element={
-            <UserGuard>
+            </DashboardLayout>
+          </UserGuard>
+        }
+      />
+      <Route
+        path="/customer/get/:id"
+        element={
+          <UserGuard>
+            <DashboardLayout>
               <GetCustomerById />
-            </UserGuard>
-          }
-        />
-
-        <Route
-          path="/customer/update/:id"
-          element={
-            <UserGuard>
+            </DashboardLayout>
+          </UserGuard>
+        }
+      />
+      <Route
+        path="/customer/update/:id"
+        element={
+          <UserGuard>
+            <DashboardLayout>
               <UpdateCustomerById />
-            </UserGuard>
-          }
-        />
-
-        <Route
-          path="/customer/delete/:id"
-          element={
-            <UserGuard>
+            </DashboardLayout>
+          </UserGuard>
+        }
+      />
+      <Route
+        path="/customer/delete/:id"
+        element={
+          <UserGuard>
+            <DashboardLayout>
               <DeleteCustomerById />
-            </UserGuard>
-          }
-        />
+            </DashboardLayout>
+          </UserGuard>
+        }
+      />
 
-        {/* SALES */}
-        <Route
-          path="/sales"
-          element={
-            <UserGuard>
+      {/* SALES / POS */}
+      <Route
+        path="/sales"
+        element={
+          <UserGuard>
+            <DashboardLayout>
               <SalesDashboard />
-            </UserGuard>
-          }
-        />
-
-        <Route
-          path="/sales/create"
-          element={
-            <UserGuard>
+            </DashboardLayout>
+          </UserGuard>
+        }
+      />
+      <Route
+        path="/sales/create"
+        element={
+          <UserGuard>
+            <DashboardLayout>
               <CreateSales />
-            </UserGuard>
-          }
-        />
-
-        <Route
-          path="/sales/get/:id"
-          element={
-            <UserGuard>
+            </DashboardLayout>
+          </UserGuard>
+        }
+      />
+      <Route
+        path="/sales/get/:id"
+        element={
+          <UserGuard>
+            <DashboardLayout>
               <GetSalesById />
-            </UserGuard>
-          }
-        />
-
-        <Route
-          path="/sales/update/:id"
-          element={
-            <UserGuard>
+            </DashboardLayout>
+          </UserGuard>
+        }
+      />
+      <Route
+        path="/sales/update/:id"
+        element={
+          <UserGuard>
+            <DashboardLayout>
               <UpdateSalesById />
-            </UserGuard>
-          }
-        />
-
-        <Route
-          path="/sales/delete/:id"
-          element={
-            <UserGuard>
+            </DashboardLayout>
+          </UserGuard>
+        }
+      />
+      <Route
+        path="/sales/delete/:id"
+        element={
+          <UserGuard>
+            <DashboardLayout>
               <DeleteSalesById />
-            </UserGuard>
-          }
-        />
+            </DashboardLayout>
+          </UserGuard>
+        }
+      />
 
-        {/* EXPENSE */}
-        <Route
-          path="/expense"
-          element={
-            <UserGuard>
+      {/* EXPENSE */}
+      <Route
+        path="/expense"
+        element={
+          <UserGuard>
+            <DashboardLayout>
               <ExpenseDashboard />
-            </UserGuard>
-          }
-        />
-
-        <Route
-          path="/expense/create"
-          element={
-            <UserGuard>
+            </DashboardLayout>
+          </UserGuard>
+        }
+      />
+      <Route
+        path="/expense/create"
+        element={
+          <UserGuard>
+            <DashboardLayout>
               <CreateExpense />
-            </UserGuard>
-          }
-        />
-
-        <Route
-          path="/expense/get/:id"
-          element={
-            <UserGuard>
+            </DashboardLayout>
+          </UserGuard>
+        }
+      />
+      <Route
+        path="/expense/get/:id"
+        element={
+          <UserGuard>
+            <DashboardLayout>
               <GetExpensesById />
-            </UserGuard>
-          }
-        />
-
-        <Route
-          path="/expense/update/:id"
-          element={
-            <UserGuard>
+            </DashboardLayout>
+          </UserGuard>
+        }
+      />
+      <Route
+        path="/expense/update/:id"
+        element={
+          <UserGuard>
+            <DashboardLayout>
               <UpdateExpenseById />
-            </UserGuard>
-          }
-        />
-
-        <Route
-          path="/expense/delete/:id"
-          element={
-            <UserGuard>
+            </DashboardLayout>
+          </UserGuard>
+        }
+      />
+      <Route
+        path="/expense/delete/:id"
+        element={
+          <UserGuard>
+            <DashboardLayout>
               <DeleteExpenseById />
-            </UserGuard>
-          }
-        />
+            </DashboardLayout>
+          </UserGuard>
+        }
+      />
 
-        {/* USER */}
-        <Route
-          path="/user"
-          element={
-            <UserGuard>
-              <h1 className="text-white text-center mt-10">
-                User Dashboard
-              </h1>
-            </UserGuard>
-          }
-        />
-
-        {/* INVOICE */}
-        <Route
-          path="/invoice/:id"
-          element={
-            <UserGuard>
+      {/* INVOICE */}
+      <Route
+        path="/invoice/:id"
+        element={
+          <UserGuard>
+            <DashboardLayout>
               <InvoicePage />
-            </UserGuard>
-          }
-        />
-      </Routes>
-    </>
+            </DashboardLayout>
+          </UserGuard>
+        }
+      />
+
+      {/* CATCH ALL FALLBACK */}
+      <Route path="*" element={<RootRedirect />} />
+    </Routes>
   );
 };
 
