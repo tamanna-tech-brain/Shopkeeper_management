@@ -28,17 +28,27 @@ const allowedOrigins = [
   "http://127.0.0.1:5173",
   "http://localhost:3000",
   "http://127.0.0.1:3000",
-];
+  process.env.CLIENT_URL,
+  process.env.FRONTEND_URL,
+].filter(Boolean);
 
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin) || origin.startsWith("http://localhost:") || origin.startsWith("http://127.0.0.1:")) {
-      callback(null, true);
-    } else {
-      callback(null, true);
+    if (!origin) return callback(null, true);
+    if (
+      allowedOrigins.includes(origin) ||
+      origin.startsWith("http://localhost:") ||
+      origin.startsWith("http://127.0.0.1:") ||
+      origin.endsWith(".vercel.app") ||
+      process.env.NODE_ENV !== "production"
+    ) {
+      return callback(null, true);
     }
+    return callback(null, true);
   },
-  credentials: true
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"]
 }));
 app.use(helmet({
   crossOriginResourcePolicy: false
@@ -101,5 +111,23 @@ app.use("/api/supplier", supplierRouter);
 app.use("/api/dashboard", dashboardRouter);
 app.use("/api/invoice", invoiceRouter);
 app.use("/api/complaint", complaintRouter);
+
+// 404 handler for unmatched routes
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    message: `Route not found: ${req.method} ${req.originalUrl}`
+  });
+});
+
+// Centralized error handling middleware
+app.use((err, req, res, next) => {
+  console.error("Global Error Handler:", err.stack || err.message);
+  const statusCode = err.statusCode || err.status || 500;
+  res.status(statusCode).json({
+    success: false,
+    message: err.message || "Internal Server Error"
+  });
+});
 
 export default app;
