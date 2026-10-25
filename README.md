@@ -4,100 +4,48 @@ ShopKeeper Pro is a comprehensive, production-grade retail and inventory managem
 
 ---
 
-## 📸 Application Screenshots & UI Showcase
+## 🏗️ Repository Architecture
 
-### 📊 1. Executive Analytics & Real-Time KPI Dashboard
-Real-time store overview tracking gross turnover, daily order count, catalog count, monthly sales trend, inventory composition, low-stock warnings, and WebSocket-driven live order toasts.
+This repository maintains a clean, decoupled client-server architecture:
 
-![Admin Overview Dashboard](./screenshots/admin_dashboard.png)
-
----
-
-### 💳 2. Point of Sale (POS) Counter Terminal
-High-speed checkout terminal with multi-item shopping carts, live customer selection, automatic stock decrement, real-time bill preview, and payment method options (**Cash**, **UPI**, **Card**).
-
-![Point of Sale Terminal](./screenshots/pos_terminal_page.png)
-
----
-
-### 📦 3. Inventory & Product Catalog
-Switchable Grid and Table views with instant search, category filters, supplier indicators, and automated stock health badges (`In Stock`, `Low Stock`, `Out of Stock`).
-
-![Inventory Catalog](./screenshots/product_page.png)
-
----
-
-### 👥 4. Customer Directory & CRM
-Customer relationship ledger tracking verified 10-digit phone numbers, physical delivery addresses, and customer profiles.
-
-![Customer CRM](./screenshots/customer_crm_page.png)
-
----
-
-### 🚚 5. Supplier & Vendor Directory
-Procurement directory managing distributor contacts, warehouse addresses, and supply vendor relations.
-
-![Supplier Directory](./screenshots/supplier_directory_page.png)
+```text
+Shopkeeper_management/
+├── .gitignore               # Comprehensive Git exclusion rules for node_modules, envs & build artifacts
+├── README.md                # Project documentation and deployment manual
+├── Backend/                 # Express 5 REST API & WebSocket Real-Time Server
+│   ├── Connection/          # MongoDB Atlas database connection handler
+│   ├── Controllers/         # Business logic for Products, Sales, Customers, Invoices, etc.
+│   ├── Middleware/          # Auth JWT, Role verification, Multer upload & Security
+│   ├── Models/              # Mongoose schemas with strict validations
+│   ├── Routers/             # Express API routes
+│   ├── Validators/          # Joi schema validations
+│   ├── config/              # Environment configuration & Cloudinary integration
+│   ├── package.json         # Backend dependencies and startup scripts
+│   └── server.js            # Node HTTP server entry point with Socket.io
+└── Frontend/                # React 19 + Vite 8 Single Page Application
+    ├── public/              # Static assets & SVG icons
+    ├── src/                 # React UI components, Redux store, pages, and hooks
+    ├── package.json         # Frontend dependencies and build scripts
+    ├── tailwind.config.js   # Tailwind CSS configuration
+    ├── vercel.json          # Vercel SPA routing rewrite configuration
+    └── vite.config.js       # Vite bundler configuration
+```
 
 ---
 
-### 💰 6. Store Expense Tracker
-Categorized operational cost ledger tracking utility bills, payroll, store rent, and monthly totals.
+## 🚀 Key Modules & Capabilities
 
-![Expense Tracker](./screenshots/expense_tracker_page.png)
-
----
-
-### 🤝 7. Customer & Supplier Welfare / Grievance Resolution Board
-Centralized ticket tracker handling customer complaints, vendor disputes, staff welfare, and product quality issues with SLA resolution metrics, priority filters, and attached evidence photos.
-
-![Grievances and Welfare Resolution Board](./screenshots/complaints_welfare_page.png)
-
----
-
-### 📝 8. Grievance Filing & Welfare Ticket Modal
-Streamlined grievance lodging workflow supporting document attachments, category tagging (Customer, Supplier, Staff Welfare, Product Quality, Store Operations), and priority assignment.
-
-![Grievance Filing Modal Flow](./screenshots/complaint_modal_flow.png)
-
----
-
-### 👤 9. Store Administrator Profile & Avatar Management
-Store settings interface with profile photo upload, store administrator credentials, and password-authenticated updates.
-
-![Store Admin Profile](./screenshots/user_profile_page.png)
-
----
-
-### 🔐 10. Secure Authentication Portal
-Glassmorphic authentication interface with password visibility toggle, credential validation, and JWT session handling.
-
-![Sign In Portal](./screenshots/login_page.png)
-
----
-
-## 🚀 Key Features
-
-- **Customer, Supplier & Staff Welfare Grievance Resolution**: End-to-end grievance resolution tracker for customer disputes, supplier delivery errors, staff working conditions, and product quality reports. Features full ticket lifecycle management (`Pending` -> `In Review` -> `Resolved` / `Rejected`), resolution audit notes, SLA performance percentage, and photo/bill evidence attachments.
-- **Universal Multi-Part Image Upload System**: Seamless file upload capabilities integrated across the entire ecosystem:
-  - **Product Catalog**: High-resolution item photos.
-  - **Customer CRM**: Client photos and ID documentation.
-  - **Supplier Directory**: Vendor company logos and supply contracts.
-  - **Expense Ledger**: Attached physical receipts and utility bills.
-  - **Store Profile**: Store administrator avatars.
-  - *Storage architecture automatically routes to Cloudinary when configured, with a resilient local disk storage fallback.*
-- **Point of Sale (POS) Terminal with Multi-Item Cart**: Rapid checkout counter allowing shopkeepers to add multiple items, adjust item quantities with `[+]` / `[-]`, and view real-time line subtotals and grand totals.
-- **Automated Inventory Stock Decrement**: Selling items automatically decrements available warehouse/shelf quantities via MongoDB `$inc`. Deleting a sale automatically restores inventory stock.
-- **Low-Stock Alert Dashboard Banner**: Automatically flags products with fewer than 10 units remaining so store managers can restock before stockouts occur.
-- **CSV Data Export**: Instant client-side CSV downloads for **Sales Transactions** and **Expense Records** formatted for Excel and accounting tools.
-- **Real-Time Barcode & SKU Generator**: Create standardized SKU codes (`SKU-XXXXXX`) with barcode preview capabilities.
-- **Product Catalog Management**: Grid and table views with category filtering, image uploads, and stock status indicators.
-- **Customer CRM**: Maintain customer records, purchase histories, and sanitized 10-digit phone verification.
-- **Supplier & Procurement Directory**: Vendor directory with warehouse addresses, contact numbers, and restock tracking.
-- **Expense Tracker**: Categorized business expenditure ledger (**Rent**, **Utilities**, **Salaries**, **Maintenance**, **Supplies**) with monthly summation.
-- **Thermal & Tax Invoices**: Print-ready invoices formatted for A4 paper and thermal receipt printers with one-click PDF export via `jsPDF`.
-- **Live Notifications**: Integrated Socket.io real-time alerts whenever a sale is completed on the POS terminal.
-- **Security & Schema Validation**: Comprehensive Joi schema validation, password hashing via `bcrypt`, JWT authentication, HTTP security headers via `helmet`, and parameter pollution protection via `hpp`.
+| Module | Core Functionality |
+|---|---|
+| **📊 Executive KPI Dashboard** | Gross turnover, real-time order velocity, catalog breakdown donut charts, monthly sales revenue trends via Recharts, and automated low-stock warnings. |
+| **💳 POS Terminal** | Multi-item checkout basket with quantity controls, customer linking, dynamic bill preview, stock decrement, and payment modes (**Cash**, **UPI**, **Card**). |
+| **📦 Product & Inventory** | Grid & table views, instant search, stock health badges (`In Stock`, `Low Stock`, `Out of Stock`), SKU generator, and Cloudinary image uploads. |
+| **👥 Customer CRM** | Customer directory with 10-digit phone verification, delivery address book, and lifetime purchase audit. |
+| **🚚 Supplier Management** | Vendor directory, warehouse logistics tracking, restock histories, and vendor contracts. |
+| **💰 Operational Expense Ledger**| Categorized expenditures (**Rent**, **Utilities**, **Salaries**, **Maintenance**, **Supplies**) with monthly summation and CSV exports. |
+| **🤝 Grievance & Welfare Board** | Dispute resolution lifecycle (`Pending` -> `In Review` -> `Resolved`/`Rejected`), SLA tracking, evidence attachments, and resolution notes. |
+| **🧾 Tax Invoice Generator** | Printable PDF invoices formatted for standard A4 and thermal receipt printers via `jsPDF`. |
+| **🔔 Real-Time WebSockets** | Instant order toasts broadcasted across store staff counters using Socket.io. |
 
 ---
 
@@ -106,8 +54,8 @@ Glassmorphic authentication interface with password visibility toggle, credentia
 ### Frontend
 - **Framework**: React 19 + Vite 8
 - **State Management**: Redux Toolkit + React Redux
-- **Styling**: Tailwind CSS + Custom Dark Theme Glassmorphism
-- **Typography**: Google Fonts (*Plus Jakarta Sans* & *Inter*)
+- **Styling**: Tailwind CSS + Glassmorphic Dark Aesthetics
+- **Typography**: Plus Jakarta Sans & Inter
 - **Data Visualization**: Recharts (Interactive AreaChart & Donut Chart)
 - **PDF Generation**: `jsPDF` + HTML2Canvas
 - **Icons**: React Icons (FontAwesome 5/6)
@@ -119,8 +67,8 @@ Glassmorphic authentication interface with password visibility toggle, credentia
 - **Database**: MongoDB Atlas with Mongoose ODM
 - **Real-Time Sync**: Socket.io Server
 - **Authentication**: JSON Web Tokens (`jsonwebtoken`) + `bcrypt`
-- **Validation**: Joi (Schemas enforcing phone numbers, name lengths, and numeric limits)
-- **File Uploads**: Multer + Cloudinary
+- **Validation**: Joi schemas enforcing phone numbers, name lengths, and numeric limits
+- **File Uploads**: Multer + Cloudinary (with fallback to local storage)
 - **Security Middlewares**: Helmet, HPP, Express-Mongo-Sanitize, Express-Rate-Limit, XSS-Clean
 
 ---
@@ -133,24 +81,8 @@ Glassmorphic authentication interface with password visibility toggle, credentia
 
 ---
 
-### 2. Fast Single-Command Setup (From Project Root)
-You can now start everything directly from the repository root:
-
-```bash
-# 1. Install all dependencies
-npm run install:all
-
-# 2. Run backend
-npm run dev
-
-# Or run frontend:
-npm run dev:frontend
-```
-
----
-
-### 3. Backend Setup
-1. Open a terminal and navigate to the `Backend` directory:
+### 2. Backend Setup
+1. Open a terminal and navigate to `Backend`:
    ```bash
    cd Backend
    ```
@@ -180,8 +112,8 @@ npm run dev:frontend
 
 ---
 
-### 4. Frontend Setup
-1. In another terminal, navigate to the `Frontend` directory:
+### 3. Frontend Setup
+1. In another terminal, navigate to `Frontend`:
    ```bash
    cd Frontend
    ```
@@ -191,7 +123,7 @@ npm run dev:frontend
    npm install
    ```
 
-3. Create a `.env` file in `Frontend/.env`:
+3. Create a `.env` file in `Frontend/.env` (optional for local dev):
    ```env
    VITE_API_URL=http://localhost:3000/api
    VITE_SOCKET_URL=http://localhost:3000
@@ -205,10 +137,10 @@ npm run dev:frontend
 
 ---
 
-## 🚀 Deployment Guide
+## 🚀 Cloud Deployment Guide
 
 ### Option A: Frontend Deployment (Vercel)
-The Frontend includes [`vercel.json`](./Frontend/vercel.json) to handle Single Page Application (SPA) client-side routes.
+The `Frontend` includes [`vercel.json`](./Frontend/vercel.json) to handle Single Page Application (SPA) client-side routes.
 
 1. Push your code to GitHub.
 2. Sign in to [Vercel](https://vercel.com/) and click **"Add New Project"**.
@@ -223,10 +155,8 @@ The Frontend includes [`vercel.json`](./Frontend/vercel.json) to handle Single P
 
 ---
 
-### Option B: Backend Deployment (Render)
-The repository includes a ready-to-use [`render.yaml`](./render.yaml) blueprint.
-
-1. Sign in to [Render](https://render.com/) and select **"New" > "Blueprint"** (or "Web Service").
+### Option B: Backend Deployment (Render / Railway / Heroku)
+1. Sign in to [Render](https://render.com/) and create a **New Web Service**.
 2. Connect your GitHub repository.
 3. Configure the Web Service:
    - **Root Directory**: `Backend`
@@ -234,14 +164,14 @@ The repository includes a ready-to-use [`render.yaml`](./render.yaml) blueprint.
    - **Build Command**: `npm install --legacy-peer-deps`
    - **Start Command**: `node server.js`
 4. Add the following **Environment Variables**:
-   - `PORT`: `3000` (or Render will provide `$PORT`)
+   - `PORT`: `3000` (or leave default for Render `$PORT`)
    - `MONGO_URI`: Your MongoDB Atlas connection string.
    - `JWT_SECRET`: A secure 64-character random string.
    - `CLOUDINARY_CLOUD_NAME`: (Optional) Your Cloudinary Cloud Name.
    - `CLOUDINARY_API_KEY`: (Optional) Your Cloudinary API Key.
    - `CLOUDINARY_API_SECRET`: (Optional) Your Cloudinary API Secret.
 5. In **MongoDB Atlas**:
-   - Go to **Network Access** and ensure your IP Whitelist includes `0.0.0.0/0` (Allow Access from Anywhere) so Render servers can connect to the database.
+   - Go to **Network Access** and ensure your IP Whitelist includes `0.0.0.0/0` (Allow Access from Anywhere) so cloud servers can connect to the database.
 6. Click **Create Web Service**.
 
 ---

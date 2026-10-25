@@ -73,6 +73,15 @@ const limiter = rateLimit({
 
 app.use(limiter);
 
+app.get("/", (req, res) => {
+    res.status(200).json({
+        name: "ShopKeeper Management API",
+        status: "online",
+        version: "1.0.0",
+        health: "/api/health"
+    });
+});
+
 app.get("/api/health", (req, res) => {
     res.status(200).json({
         status: "ok",
